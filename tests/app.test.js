@@ -16,7 +16,11 @@ class Element {
     this.listeners = new Map();
     this.attributes = new Map();
     this.dataset = {};
-    this.classList = { toggle() {} };
+    const classes = new Set();
+    this.classList = {
+      toggle(name, enabled) { if (enabled) classes.add(name); else classes.delete(name); },
+      contains(name) { return classes.has(name); },
+    };
   }
   addEventListener(event, handler) {
     if (!this.listeners.has(event)) this.listeners.set(event, []);
@@ -30,6 +34,8 @@ class Element {
   insertAdjacentHTML(_, content) { this.innerHTML += content; }
   focus() { focused = this.selector; }
   scrollIntoView() {}
+  setPointerCapture(id) { this.capturedPointer = id; }
+  releasePointerCapture() { this.capturedPointer = null; }
   showModal() { this.open = true; }
   close() { this.open = false; void this.dispatch('close'); }
   getBoundingClientRect() { return { left: 0, right: 440, top: 0, bottom: 440 }; }
@@ -81,10 +87,11 @@ function target(dataset) {
   const button = new Element('event-target');
   button.dataset = dataset;
   return { closest: selector => {
-    const key = selector.match(/^\[data-([a-z-]+)\]$/)?.[1];
+    const key = selector.match(/^\[data-([a-z-]+)\]$/)?.[1]?.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
     return key && key in dataset ? button : null;
   } };
 }
+function runQuery(input) { return registered[0].execute({ adjacentOnly: false, ...input }); }
 async function selectPoint(point) {
   await element('#point-grid').dispatch('click', { target: target({ point: String(point) }) });
 }
@@ -118,7 +125,72 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
 
   try {
     await import('../src/app.js');
+    await settle(() => element('#total-count').textContent === '10,096', 'default adjacent enumeration');
+    assert.equal(element('#adjacent-only').checked, true);
+    assert.equal(element('#remaining-count').textContent, '10,096');
+    const sketchPoints = () => [...element('#sketch-sequence').innerHTML.matchAll(/class="seq-number">(\d)/g)].map(match => Number(match[1]));
+    const sketchClick = point => element('#sketch-pad').dispatch('click', { detail: 0, target: target({ sketchPoint: String(point) }) });
+    const pointer = (point, pointerId = 1) => {
+      const x = 32 + ((point - 1) % 3) * 48;
+      const y = 32 + Math.floor((point - 1) / 3) * 48;
+      return { pointerId, isPrimary: true, button: 0, clientX: x * 440 / 160, clientY: y * 440 / 160, target: target({ sketchPoint: String(point) }) };
+    };
+    await sketchClick(1);
+    await sketchClick(5);
+    await sketchClick(9);
+    assert.deepEqual(sketchPoints(), [1, 5, 9]);
+    assert.equal(element('#included-count').textContent, 0, 'practice drawing leaves memory clues independent');
+    assert.equal(element('#total-count').textContent, '10,096');
+    await element('#sketch-undo').dispatch('click');
+    assert.deepEqual(sketchPoints(), [1, 5]);
+    await element('#sketch-clear').dispatch('click');
+    assert.equal(element('#sketch-undo').disabled, true);
+    assert.equal(focused, '[data-sketch-point="1"]', 'clear leaves keyboard focus on an available point');
+    await sketchClick(1);
+    await sketchClick(8);
+    assert.deepEqual(sketchPoints(), [1]);
+    assert.match(element('#sketch-status').textContent, /1 → 8/);
+    await element('#sketch-undo').dispatch('click');
+    assert.equal(focused, '[data-sketch-point="1"]', 'undoing the last point preserves usable focus');
+    await element('#sketch-clear').dispatch('click');
+    await element('#sketch-pad').dispatch('pointerdown', pointer(1));
+    await element('#sketch-pad').dispatch('pointermove', pointer(3));
+    await element('#sketch-pad').dispatch('pointerup', pointer(3));
+    assert.deepEqual(sketchPoints(), [1, 2, 3], 'fast drag includes the crossed midpoint');
+    assert.equal(element('#sketch-pad').capturedPointer, null);
+    assert.doesNotMatch(element('#sketch-lines').innerHTML, /sketch-guide/);
+    await element('#sketch-pad').dispatch('click', { detail: 1, target: target({ sketchPoint: '3' }) });
+    assert.deepEqual(sketchPoints(), [1, 2, 3], 'synthetic pointer click does not add a second point');
+    assert.doesNotMatch(element('#sketch-status').textContent, /已经使用/);
+    await element('#sketch-clear').dispatch('click');
+    await element('#sketch-pad').dispatch('pointerdown', { ...pointer(1), isPrimary: false });
+    assert.deepEqual(sketchPoints(), [], 'secondary pointers are ignored');
+    await element('#sketch-pad').dispatch('pointerdown', pointer(1, 2));
+    await element('#sketch-pad').dispatch('pointermove', pointer(5, 2));
+    await element('#sketch-pad').dispatch('pointercancel', pointer(5, 2));
+    assert.deepEqual(sketchPoints(), [1, 5]);
+    assert.equal(element('#sketch-pad').capturedPointer, null);
+    await element('#sketch-clear').dispatch('click');
+    element('#adjacent-only').checked = false;
+    await element('#adjacent-only').dispatch('change');
+    assert.match(element('#result-status').textContent, /线索已调整/);
+    await element('#clue-form').dispatch('submit');
     await settle(() => element('#total-count').textContent === '389,112', 'initial enumeration');
+    await sketchClick(1);
+    await sketchClick(3);
+    assert.deepEqual(sketchPoints(), [1, 2, 3], 'Android point clicks insert unvisited midpoint');
+    await element('#sketch-clear').dispatch('click');
+    await sketchClick(2);
+    await sketchClick(1);
+    await sketchClick(3);
+    assert.deepEqual(sketchPoints(), [2, 1, 3]);
+    element('#adjacent-only').checked = true;
+    await element('#adjacent-only').dispatch('change');
+    assert.deepEqual(sketchPoints(), [2, 1, 3], 'rule changes preserve the drawing');
+    assert.match(element('#sketch-status').textContent, /已有连线包含跨格连接/);
+    element('#adjacent-only').checked = false;
+    await element('#adjacent-only').dispatch('change');
+    await element('#sketch-clear').dispatch('click');
     assert.equal(element('#remaining-count').textContent, '389,112');
     assert.equal((element('#pattern-grid').innerHTML.match(/data-pattern=/g) || []).length, 24);
     assert.equal(element('#page-input').max, 16213);
@@ -164,9 +236,9 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.doesNotMatch(element('#pattern-grid').innerHTML, /<text /);
 
     const before = element('#constraint-summary').textContent;
-    await assert.rejects(() => registered[0].execute({ included: [1], excluded: [1], minLength: 4, maxLength: 6 }), /同时必含和排除/);
+    await assert.rejects(() => runQuery({ included: [1], excluded: [1], minLength: 4, maxLength: 6 }), /同时必含和排除/);
     assert.equal(element('#constraint-summary').textContent, before, 'invalid tool input must not change page state');
-    const toolResult = await registered[0].execute({ included: [1, 3], excluded: [2, 4, 5, 6, 7, 8, 9], minLength: 2, maxLength: 2 });
+    const toolResult = await runQuery({ included: [1, 3], excluded: [2, 4, 5, 6, 7, 8, 9], minLength: 2, maxLength: 2 });
     assert.equal(toolResult.total, 0);
     assert.equal(element('#empty-state').hidden, false);
 
@@ -179,12 +251,15 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     failNextWorker = true;
     await element('#reset').dispatch('click');
     await settle(() => element('#result-status').textContent.includes('无法启动'), 'worker failure');
+    assert.equal(element('#adjacent-only').checked, true);
+    element('#adjacent-only').checked = false;
+    await element('#adjacent-only').dispatch('change');
     await element('#clue-form').dispatch('submit');
     await settle(() => element('#total-count').textContent === '389,112', 'worker retry');
     assert.equal(element('#empty-state').hidden, true);
 
-    const first = registered[0].execute({ included: [], excluded: [], minLength: 9, maxLength: 9 });
-    const second = registered[0].execute({ included: [2], excluded: [], minLength: 1, maxLength: 1 });
+    const first = runQuery({ included: [], excluded: [], minLength: 9, maxLength: 9 });
+    const second = runQuery({ included: [2], excluded: [], minLength: 1, maxLength: 1 });
     await assert.rejects(first, /取消/);
     const newest = await second;
     assert.equal(newest.total, 1);
@@ -192,7 +267,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.match(element('#pattern-grid').innerHTML, /data-pattern="2"/);
 
     const endpoints = { included: [], excluded: [], minLength: 4, maxLength: 6, startPoint: 1, endPoint: 9 };
-    const endpointResult = await registered[0].execute(endpoints);
+    const endpointResult = await runQuery(endpoints);
     assert.equal(endpointResult.total, 462);
     assert.equal(element('#remaining-count').textContent, '462');
     assert.deepEqual(endpointResult.counts.slice(4, 7), [18, 92, 352]);
@@ -214,7 +289,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(element('#remaining-count').textContent, '461', 'hiding does not change the remaining count');
     assert.doesNotMatch(element('#pattern-grid').innerHTML, new RegExp(`data-pattern="${dismissed}"`));
     assert.match(element('#pattern-grid').innerHTML, /#0002/, 'source numbering remains stable after hiding');
-    const regenerated = await registered[0].execute(endpoints);
+    const regenerated = await runQuery(endpoints);
     assert.equal(regenerated.total, 461, 'exclusions survive regeneration');
     assert.equal(regenerated.enumeratedTotal, 462);
     await element('#export').dispatch('click');
@@ -249,11 +324,11 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await element('#start-point').dispatch('change');
     assert.equal(element('#generate').disabled, false);
     const unchanged = element('#constraint-summary').textContent;
-    await assert.rejects(() => registered[0].execute({ ...endpoints, excluded: [1] }), /同时必含和排除/);
+    await assert.rejects(() => runQuery({ ...endpoints, excluded: [1] }), /同时必含和排除/);
     assert.equal(element('#constraint-summary').textContent, unchanged);
-    await assert.rejects(() => registered[0].execute({ ...endpoints, maxLength: 1, minLength: 1 }), /2 个不同点/);
+    await assert.rejects(() => runQuery({ ...endpoints, maxLength: 1, minLength: 1 }), /2 个不同点/);
 
-    await registered[0].execute({ included: [], excluded: [], minLength: 1, maxLength: 9, startPoint: 5, endPoint: 5 });
+    await runQuery({ included: [], excluded: [], minLength: 1, maxLength: 9, startPoint: 5, endPoint: 5 });
     assert.equal(element('#total-count').textContent, '1');
     assert.match(element('#pattern-grid').innerHTML, /data-pattern="5"/);
     await element('#pattern-grid').dispatch('click', { target: target({ dismiss: '5' }) });
@@ -268,7 +343,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(element('#empty-state').hidden, true);
     assert.equal(focused, '#hide-dismissed', 'restoring hidden candidates must leave focus on a visible control');
 
-    await registered[0].execute({ included: [], excluded: [], minLength: 2, maxLength: 2 });
+    await runQuery({ included: [], excluded: [], minLength: 2, maxLength: 2 });
     element('#page-input').value = '3';
     await element('#page-input').dispatch('change');
     const tail = [...element('#pattern-grid').innerHTML.matchAll(/data-pattern="(\d+)"/g)].map(match => match[1]);
@@ -277,7 +352,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(element('#page-input').value, 2, 'hiding a complete tail page clamps to the previous page');
     assert.equal(element('#total-count').textContent, '48');
 
-    await registered[0].execute({ included: [], excluded: [], minLength: 1, maxLength: 2 });
+    await runQuery({ included: [], excluded: [], minLength: 1, maxLength: 2 });
     await element('#length-filters').dispatch('click', { target: target({ length: '1' }) });
     const singlePoints = [...element('#pattern-grid').innerHTML.matchAll(/data-pattern="(\d+)"/g)].map(match => match[1]);
     for (const code of singlePoints) await element('#pattern-grid').dispatch('click', { target: target({ dismiss: code }) });
@@ -294,14 +369,15 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
 
     // Old-query exclusions must not reduce a new query's unrelated result count.
     await element('#pattern-grid').dispatch('click', { target: target({ dismiss: '1' }) });
-    const different = await registered[0].execute({ included: [2], excluded: [], minLength: 1, maxLength: 1 });
+    const different = await runQuery({ included: [2], excluded: [], minLength: 1, maxLength: 1 });
     assert.equal(different.total, 1);
     assert.equal(element('#remaining-count').textContent, '1', 'old-query exclusions do not affect remaining');
     assert.match(element('#dismissed-summary').textContent, /0 个/);
     await element('#reset').dispatch('click');
     assert.equal(element('#start-point').value, 0);
     assert.equal(element('#end-point').value, 0);
-    await settle(() => element('#total-count').textContent === '389,112', 'reset preserves unrelated single-point exclusion');
+    assert.equal(element('#adjacent-only').checked, true);
+    await settle(() => element('#total-count').textContent === '10,096', 'reset restores adjacency and preserves unrelated single-point exclusion');
   } finally {
     for (const timer of timers) clearTimeout(timer);
     globalThis.setTimeout = nativeSetTimeout;

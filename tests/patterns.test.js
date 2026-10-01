@@ -21,6 +21,34 @@ function independentlyValid(code) {
 
 const all = enumeratePatterns({ minLength: 1, maxLength: 9 });
 
+test('adjacent rule matches filtering the Android search space and preserves diagonal neighbours', () => {
+  const adjacent = code => {
+    const points = String(code).split('').map(Number);
+    return points.slice(1).every((point, i) => {
+      const previous = points[i];
+      return Math.abs(Math.floor((point - 1) / 3) - Math.floor((previous - 1) / 3)) <= 1 &&
+        Math.abs(((point - 1) % 3) - ((previous - 1) % 3)) <= 1;
+    });
+  };
+  const result = enumeratePatterns({ minLength: 1, maxLength: 9, adjacentOnly: true });
+  assert.deepEqual(result.patterns, all.patterns.filter(adjacent));
+  assert.deepEqual(Array.from(result.counts), [0, 9, 40, 160, 496, 1208, 2240, 2984, 2384, 784]);
+  assert.equal(enumeratePatterns({ adjacentOnly: true }).total, 10096);
+  assert.equal(enumeratePatterns({ adjacentOnly: false }).total, 389112);
+  const query = { included: [7, 8, 9], excluded: [3, 6], endPoint: 9, minLength: 4, maxLength: 6 };
+  const filtered = enumeratePatterns({ ...query, adjacentOnly: true });
+  assert.deepEqual(filtered.patterns, enumeratePatterns(query).patterns.filter(adjacent));
+  assert.equal(filtered.total, 50);
+  assert.deepEqual(Array.from(filtered.counts).slice(4, 7), [6, 16, 28]);
+});
+
+test('adjacent rule rejects long moves even after their midpoint has been visited', () => {
+  const patterns = new Set(enumeratePatterns({ minLength: 1, maxLength: 3, adjacentOnly: true }).patterns);
+  for (const code of [18, 16, 34, 67, 213, 519, 417, 546]) assert.ok(!patterns.has(code), `${code} crosses a row or column`);
+  for (const code of [15, 159, 123, 214, 789, 5]) assert.ok(patterns.has(code), `${code} is adjacent`);
+  assert.throws(() => enumeratePatterns({ adjacentOnly: 'true' }), TypeError);
+});
+
 test('start and end restrictions match independently filtering the complete search space', () => {
   for (const query of [
     { startPoint: 1, endPoint: 9, minLength: 4, maxLength: 6 },

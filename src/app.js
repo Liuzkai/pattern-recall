@@ -1,11 +1,12 @@
 import { filterByLength, paginatePatterns, validateConstraints } from './patterns.js';
 import { patternSvg, sequenceMarkup } from './render.js';
+import { createSketchTool } from './sketch.js';
 
 const $ = selector => document.querySelector(selector);
 const format = number => number.toLocaleString('zh-CN');
 const PAGE_SIZE = 24;
 const state = {
-  points: Array(9).fill('neutral'), mode: 'include', minLength: 4, maxLength: 9, startPoint: 0, endPoint: 0,
+  points: Array(9).fill('neutral'), mode: 'include', minLength: 4, maxLength: 9, startPoint: 0, endPoint: 0, adjacentOnly: true,
   patterns: new Uint32Array(), visible: new Uint32Array(), counts: new Uint32Array(10),
   remaining: new Uint32Array(), remainingCounts: new Uint32Array(10), active: new Uint32Array(), activeCounts: new Uint32Array(10),
   dismissed: new Set(), dismissedCount: 0, hideDismissed: false,
@@ -13,6 +14,7 @@ const state = {
   busy: false, exporting: false, worker: null, cancel: null, detail: null, returnFocus: null,
 };
 let toastTimer;
+const sketch = createSketchTool({ getAdjacentOnly: () => state.adjacentOnly });
 
 function constraints() {
   return {
@@ -20,6 +22,7 @@ function constraints() {
     excluded: state.points.flatMap((mode, index) => mode === 'excluded' ? [index + 1] : []),
     minLength: state.minLength, maxLength: state.maxLength,
     startPoint: state.startPoint, endPoint: state.endPoint,
+    adjacentOnly: state.adjacentOnly,
   };
 }
 
@@ -34,6 +37,7 @@ function describe(query) {
   if (!parts.length && !query.startPoint && !query.endPoint) parts.push('暂无点位限制');
   if (query.startPoint) parts.push(`起点 ${query.startPoint}`);
   if (query.endPoint) parts.push(`终点 ${query.endPoint}`);
+  if (query.adjacentOnly) parts.push('仅相邻连线');
   parts.push(query.minLength === query.maxLength ? `${query.minLength} 个点` : `${query.minLength}–${query.maxLength} 个点`);
   return parts.join(' · ');
 }
@@ -61,6 +65,8 @@ function renderInputs() {
   $('#max-length').value = state.maxLength;
   $('#start-point').value = state.startPoint;
   $('#end-point').value = state.endPoint;
+  $('#adjacent-only').checked = state.adjacentOnly;
+  sketch.refreshRule();
   $('#length-track').innerHTML = Array.from({ length: 9 }, (_, index) => `<span class="length-tick ${index + 1 >= state.minLength && index + 1 <= state.maxLength ? 'active' : ''}">${index + 1}</span>`).join('');
   $('#constraint-summary').textContent = describe(query);
   const error = constraintError(query);
@@ -181,6 +187,7 @@ function reset() {
   state.maxLength = 9;
   state.startPoint = 0;
   state.endPoint = 0;
+  state.adjacentOnly = true;
   setMode('include');
   renderInputs();
   void generatePatterns();
@@ -258,7 +265,7 @@ async function exportPatterns() {
     const url = URL.createObjectURL(new Blob(parts, { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `图案候选_${query.minLength}-${query.maxLength}点_包含${query.included.join('') || '无'}_排除${query.excluded.join('') || '无'}${query.startPoint ? `_起点${query.startPoint}` : ''}${query.endPoint ? `_终点${query.endPoint}` : ''}${hideDismissed ? '_已过滤排除图案' : ''}.csv`;
+    link.download = `图案候选_${query.minLength}-${query.maxLength}点_包含${query.included.join('') || '无'}_排除${query.excluded.join('') || '无'}${query.startPoint ? `_起点${query.startPoint}` : ''}${query.endPoint ? `_终点${query.endPoint}` : ''}${query.adjacentOnly ? '_仅相邻连线' : ''}${hideDismissed ? '_已过滤排除图案' : ''}.csv`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
     notify(`已导出全部 ${format(snapshot.length)} 个图案`);
@@ -300,6 +307,7 @@ $('#max-length').addEventListener('change', event => {
 });
 $('#start-point').addEventListener('change', event => { state.startPoint = Number(event.target.value); renderInputs(); });
 $('#end-point').addEventListener('change', event => { state.endPoint = Number(event.target.value); renderInputs(); });
+$('#adjacent-only').addEventListener('change', event => { state.adjacentOnly = event.target.checked; renderInputs(); });
 $('#clue-form').addEventListener('submit', event => { event.preventDefault(); void generatePatterns(); });
 $('#reset').addEventListener('click', reset);
 $('#empty-reset').addEventListener('click', () => {
@@ -363,7 +371,7 @@ if (document.modelContext?.registerTool) {
   const tool = {
     name: 'enumerate_pattern_candidates',
     title: '按线索列举图案密码',
-    description: '设置必含点、排除点、点数范围以及可选起终点，在当前页面列举符合 Android 九宫格规则的全部图案。返回当前隐藏设置下的总数和第一页点序列。',
+    description: '设置必含点、排除点、点数范围、起终点和相邻连线规则，在当前页面列举图案。默认仅连接相邻点。返回当前隐藏设置下的总数和第一页点序列。',
     inputSchema: {
       type: 'object', additionalProperties: false,
       properties: {
@@ -373,6 +381,7 @@ if (document.modelContext?.registerTool) {
         maxLength: { type: 'integer', minimum: 1, maximum: 9 },
         startPoint: { type: 'integer', minimum: 0, maximum: 9, description: '0 表示不确定' },
         endPoint: { type: 'integer', minimum: 0, maximum: 9, description: '0 表示不确定' },
+        adjacentOnly: { type: 'boolean', default: true, description: '只允许相邻横线、竖线、对角线，禁止跨整行或整列' },
       },
       required: ['included', 'excluded', 'minLength', 'maxLength'],
     },
@@ -380,9 +389,9 @@ if (document.modelContext?.registerTool) {
     async execute(input) {
       if (!input || typeof input !== 'object') throw new TypeError('请提供有效线索');
       for (const key of ['included', 'excluded', 'minLength', 'maxLength']) if (!(key in input)) throw new TypeError(`缺少 ${key}`);
-      const checked = validateConstraints(input);
+      const checked = validateConstraints({ ...input, adjacentOnly: input.adjacentOnly === undefined ? true : input.adjacentOnly });
       if (checked.required & checked.forbidden) throw new RangeError('同一个点不能同时必含和排除');
-      const query = { included: input.included, excluded: input.excluded, minLength: checked.minLength, maxLength: checked.maxLength, startPoint: checked.startPoint, endPoint: checked.endPoint };
+      const query = { included: input.included, excluded: input.excluded, minLength: checked.minLength, maxLength: checked.maxLength, startPoint: checked.startPoint, endPoint: checked.endPoint, adjacentOnly: checked.adjacentOnly };
       const error = constraintError(query);
       if (error) throw new RangeError(error);
       state.points = Array.from({ length: 9 }, (_, i) => input.included.includes(i + 1) ? 'included' : input.excluded.includes(i + 1) ? 'excluded' : 'neutral');
@@ -390,6 +399,7 @@ if (document.modelContext?.registerTool) {
       state.maxLength = checked.maxLength;
       state.startPoint = checked.startPoint;
       state.endPoint = checked.endPoint;
+      state.adjacentOnly = checked.adjacentOnly;
       renderInputs();
       const result = await generatePatterns();
       if (!result) throw new Error('计算未完成或已被新的请求取消');
