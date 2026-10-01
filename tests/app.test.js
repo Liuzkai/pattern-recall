@@ -139,6 +139,15 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await sketchClick(5);
     await sketchClick(9);
     assert.deepEqual(sketchPoints(), [1, 5, 9]);
+    const drawing = element('#sketch-lines').innerHTML;
+    element('#sketch-show-numbers').checked = false;
+    await element('#sketch-show-numbers').dispatch('change');
+    assert.ok(element('#sketch-points').classList.contains('is-dot-mode'));
+    for (let point = 1; point <= 9; point++) assert.equal(element(`[data-sketch-point="${point}"]`).textContent, '');
+    assert.equal(element('[data-sketch-point="5"]').attributes.get('aria-label'), '试画点 5，第 2 个点');
+    assert.equal(element('#sketch-lines').innerHTML, drawing, 'changing point appearance preserves the drawing');
+    assert.deepEqual(sketchPoints(), [1, 5, 9]);
+    assert.equal(element('#show-numbers').checked, true, 'sketch appearance is independent of result point labels');
     assert.equal(element('#included-count').textContent, 0, 'practice drawing leaves memory clues independent');
     assert.equal(element('#total-count').textContent, '10,096');
     await element('#sketch-undo').dispatch('click');
@@ -149,6 +158,11 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await sketchClick(1);
     await sketchClick(8);
     assert.deepEqual(sketchPoints(), [1]);
+    assert.equal(element('[data-sketch-point="1"]').textContent, '', 'drawing and clearing retain the dot preference');
+    element('#sketch-show-numbers').checked = true;
+    await element('#sketch-show-numbers').dispatch('change');
+    assert.equal(element('#sketch-points').classList.contains('is-dot-mode'), false);
+    for (let point = 1; point <= 9; point++) assert.equal(element(`[data-sketch-point="${point}"]`).textContent, String(point));
     assert.match(element('#sketch-status').textContent, /1 → 8/);
     await element('#sketch-undo').dispatch('click');
     assert.equal(focused, '[data-sketch-point="1"]', 'undoing the last point preserves usable focus');

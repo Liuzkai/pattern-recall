@@ -56,6 +56,7 @@ export function pointsAlongSegment(from, to, radius = 12) {
 export function createSketchTool({ getAdjacentOnly }) {
   const $ = selector => document.querySelector(selector);
   const pad = $('#sketch-pad');
+  const numberToggle = $('#sketch-show-numbers');
   let points = [], pointerId = null, previous = null, guide = null, reason = '';
   $('#sketch-points').innerHTML = Array.from({ length: 9 }, (_, i) => {
     const point = i + 1;
@@ -64,12 +65,14 @@ export function createSketchTool({ getAdjacentOnly }) {
   }).join('');
 
   function render() {
+    $('#sketch-points').classList.toggle('is-dot-mode', !numberToggle.checked);
     const line = points.length > 1 ? `<polyline class="sketch-line" points="${points.map(point => position(point).join(',')).join(' ')}"/>` : '';
     const tail = guide && points.length ? `<line class="sketch-guide" x1="${position(points.at(-1))[0]}" y1="${position(points.at(-1))[1]}" x2="${guide.x}" y2="${guide.y}"/>` : '';
     $('#sketch-lines').innerHTML = line + tail;
     for (let point = 1; point <= 9; point++) {
       const button = $(`[data-sketch-point="${point}"]`);
       const order = points.indexOf(point);
+      button.textContent = numberToggle.checked ? String(point) : '';
       button.classList.toggle('is-used', order !== -1);
       button.classList.toggle('is-start', order === 0);
       button.classList.toggle('is-end', order > 0 && order === points.length - 1);
@@ -161,6 +164,7 @@ export function createSketchTool({ getAdjacentOnly }) {
     finish(); points = []; reason = ''; render();
     $('[data-sketch-point="1"]').focus();
   });
+  numberToggle.addEventListener('change', render);
   render();
   return { refreshRule() { reason = ''; render(); } };
 }

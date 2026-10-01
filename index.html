@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#151719" />
+    <meta name="theme-color" content="#0c1726" />
     <meta name="description" content="用记得的点和长度，筛选所有可能的 3×3 图案密码。所有计算都在本地完成。" />
     <title>记忆线索 · Pattern Recall</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="stylesheet" href="./src/glass.css" />
     <script type="module" src="./src/app.js"></script>
   </head>
   <body>
@@ -31,7 +32,15 @@
           <div class="panel-heading"><h2 id="clue-title">你的记忆线索</h2><button id="reset" class="text-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg>重置</button></div>
           <details class="sketch-tool" id="sketch-tool">
             <summary><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 12-12 4 4L8 20H4zm10-10 4 4"/></svg>试画九宫格</span><span class="sketch-fold" aria-hidden="true"></span></summary>
-            <div class="sketch-content"><p class="field-hint">按住拖动画线，也可逐点点击。试着画出记忆中的方向。</p><div id="sketch-pad" class="sketch-pad" role="group" aria-label="九宫格试画区"><svg id="sketch-lines" viewBox="0 0 160 160" aria-hidden="true"></svg><div id="sketch-points"></div></div><div class="sketch-meta"><span>绘制顺序</span><span id="sketch-count">0 / 9 点</span></div><div id="sketch-sequence" class="sketch-sequence"></div><p id="sketch-status" class="sketch-status" role="status" aria-live="polite"></p><div class="sketch-actions"><button id="sketch-undo" class="secondary-button" type="button" disabled>撤回一点</button><button id="sketch-clear" class="secondary-button" type="button" disabled>清空试画</button></div></div>
+            <div class="sketch-content">
+              <p class="field-hint">按住拖动画线，也可逐点点击。试着画出记忆中的方向。</p>
+              <div class="sketch-toolbar"><span>试着连一条熟悉的线</span><label class="number-toggle"><input id="sketch-show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>显示数字</label></div>
+              <div id="sketch-pad" class="sketch-pad" role="group" aria-label="九宫格试画区"><svg id="sketch-lines" viewBox="0 0 160 160" aria-hidden="true"></svg><div id="sketch-points"></div></div>
+              <div class="sketch-meta"><span>绘制顺序</span><span id="sketch-count">0 / 9 点</span></div>
+              <div id="sketch-sequence" class="sketch-sequence"></div>
+              <p id="sketch-status" class="sketch-status" role="status" aria-live="polite"></p>
+              <div class="sketch-actions"><button id="sketch-undo" class="secondary-button" type="button" disabled>撤回一点</button><button id="sketch-clear" class="secondary-button" type="button" disabled>清空试画</button></div>
+            </div>
           </details>
           <form id="clue-form">
             <fieldset class="point-section">
