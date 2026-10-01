@@ -1,0 +1,84 @@
+# 记忆线索 · Pattern Recall
+
+一个帮助回忆 3×3 图案密码的本地前端工具。通过必含点、排除点和点数范围，穷举全部符合条件的图案，以九宫格图形和点序列展示。
+
+## 本地开发
+
+使用 Node.js 20 或更新版本，无需安装依赖：
+
+```bash
+cd pattern-recall
+npm run dev
+```
+
+打开 http://127.0.0.1:5173/ 。修改 HTML、CSS 或 JavaScript 后刷新页面即可。端口已占用时：
+
+```bash
+npm run dev -- --port 5174
+```
+
+## 使用
+
+1. 选择「必须包含」或「一定排除」，点击九宫格点位。再次点击可取消；「清除」模式把点恢复为不确定。
+2. 设置最少、最多点数。默认 4–9，支持 1–9；上下限交叉时自动同步。
+3. 点击「列举可能的图案」。结果每页展示 24 条，可按点数查看、翻页或直接输入页码。
+4. 点击图案查看方向、完整点序列和动画回放，可复制点序列。
+5. 「导出全部」下载本次条件下的完整 CSV，包含序号、点数、点序列。长度标签仅改变当前展示，不改变完整导出范围。
+
+绿色点代表起点，紫色轮廓代表终点，连线上的箭头表示方向。必含点不限定先后顺序。
+
+## 图案规则
+
+遵循 Android 的有效点序列规则：
+
+- 点号按行编号：`1 2 3 / 4 5 6 / 7 8 9`。
+- 每个点最多使用一次，顺序决定图案。
+- 跨过一个中间点时，中间点必须已经出现。例如 `1→3` 不能直接起笔；`2→1→3` 合法。
+- Android 绘制时会自动补入尚未经过的中间点，因此 `1→3` 实际保存为 `1→2→3`，本工具列举的是实际保存的序列。
+- 默认 4–9 点对应常见 Android 最短长度。1–3 点用于扩大回忆范围，通常不能设为 Android 解锁密码。
+- 不合并旋转、镜像或反向序列；反向序列只在自身也满足规则时出现。
+
+不加限制时，4–9 点共有 **389,112** 条有效序列。各长度数量：
+
+| 点数 | 图案数 |
+| --- | ---: |
+| 1 | 9 |
+| 2 | 56 |
+| 3 | 320 |
+| 4 | 1,624 |
+| 5 | 7,152 |
+| 6 | 26,016 |
+| 7 | 72,912 |
+| 8 | 140,704 |
+| 9 | 140,704 |
+
+规则参考 AOSP [LockPatternView](https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/com/android/internal/widget/LockPatternView.java) 和 [LockPatternUtils](https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/com/android/internal/widget/LockPatternUtils.java)。
+
+## 验证与构建
+
+```bash
+npm test
+npm run build
+npm run preview
+```
+
+构建把静态资源复制到 `dist/`，可交给任意静态服务器。请通过 HTTP 服务打开，直接双击 HTML 的 `file://` 模式无法可靠加载 ES 模块和 Worker。
+
+## 结构
+
+```text
+index.html             页面结构
+favicon.svg            站点图标
+src/app.js             输入、筛选、分页、详情、CSV 导出
+src/patterns.js         纯枚举算法与分页函数
+src/worker.js           后台线程计算与结果转移
+src/render.js           SVG 图案和方向箭头
+src/styles.css         响应式样式
+scripts/serve.mjs       零依赖本地静态服务器
+scripts/build.mjs       静态资源构建
+tests/                 核心算法与交互逻辑验证
+```
+
+枚举采用深度优先搜索及位掩码条件剪枝。完整结果存储于 `Uint32Array`，通过 Worker 转移至页面，每次只渲染一页。导出按块生成 CSV，避免长时间阻塞交互。所有计算都在浏览器本地进行，不发起外部请求、不上传点位、不持久保存线索。
+
+在支持 WebMCP 的浏览器中，页面还会注册可选的 `enumerate_pattern_candidates` 工具，与可见界面共用同一套状态和操作；不支持时不影响正常使用。
