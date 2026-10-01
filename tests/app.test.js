@@ -119,6 +119,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
   try {
     await import('../src/app.js');
     await settle(() => element('#total-count').textContent === '389,112', 'initial enumeration');
+    assert.equal(element('#remaining-count').textContent, '389,112');
     assert.equal((element('#pattern-grid').innerHTML.match(/data-pattern=/g) || []).length, 24);
     assert.equal(element('#page-input').max, 16213);
     assert.equal(registered[0].name, 'enumerate_pattern_candidates');
@@ -193,6 +194,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     const endpoints = { included: [], excluded: [], minLength: 4, maxLength: 6, startPoint: 1, endPoint: 9 };
     const endpointResult = await registered[0].execute(endpoints);
     assert.equal(endpointResult.total, 462);
+    assert.equal(element('#remaining-count').textContent, '462');
     assert.deepEqual(endpointResult.counts.slice(4, 7), [18, 92, 352]);
     assert.ok(endpointResult.firstPage.every(code => code.startsWith('1') && code.endsWith('9')));
     assert.match(element('#result-description').textContent, /起点 1 · 终点 9/);
@@ -204,10 +206,12 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.match(element('#pattern-grid').innerHTML, /<\/button><button class="pattern-dismiss"/, 'view and dismiss controls are siblings');
     assert.match(element('#dismissed-summary').textContent, /1 个/);
     assert.equal(element('#total-count').textContent, '462', 'dimmed candidates remain visible until hiding is enabled');
+    assert.equal(element('#remaining-count').textContent, '461', 'remaining excludes dimmed candidates even with hiding off');
 
     element('#hide-dismissed').checked = true;
     await element('#hide-dismissed').dispatch('change');
     assert.equal(element('#total-count').textContent, '461');
+    assert.equal(element('#remaining-count').textContent, '461', 'hiding does not change the remaining count');
     assert.doesNotMatch(element('#pattern-grid').innerHTML, new RegExp(`data-pattern="${dismissed}"`));
     assert.match(element('#pattern-grid').innerHTML, /#0002/, 'source numbering remains stable after hiding');
     const regenerated = await registered[0].execute(endpoints);
@@ -223,6 +227,19 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.ok(!filteredCsv.includes(`,${dismissed}\r\n`));
     assert.match(downloads[1].filename, /起点1_终点9_已过滤排除图案/);
     assert.equal(element('#total-count').textContent, '462');
+    assert.equal(element('#remaining-count').textContent, '462', 'restoring all updates remaining');
+    await element('#length-filters').dispatch('click', { target: target({ length: '5' }) });
+    assert.equal(element('#remaining-count').textContent, '92', 'remaining follows the selected length');
+    const fivePointCode = element('#pattern-grid').innerHTML.match(/data-pattern="(\d+)"/)[1];
+    await element('#pattern-grid').dispatch('click', { target: target({ dismiss: fivePointCode }) });
+    assert.equal(element('#remaining-count').textContent, '91');
+    element('#hide-dismissed').checked = true;
+    await element('#hide-dismissed').dispatch('change');
+    assert.equal(element('#remaining-count').textContent, '91');
+    await element('#restore-all').dispatch('click');
+    assert.equal(element('#remaining-count').textContent, '92');
+    await element('#length-filters').dispatch('click', { target: target({ length: '0' }) });
+    assert.equal(element('#remaining-count').textContent, '462');
 
     element('#start-point').value = '9';
     await element('#start-point').dispatch('change');
@@ -243,6 +260,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     element('#hide-dismissed').checked = true;
     await element('#hide-dismissed').dispatch('change');
     assert.equal(element('#total-count').textContent, '0');
+    assert.equal(element('#remaining-count').textContent, '0');
     assert.equal(element('#export').disabled, true);
     assert.match(element('#empty-title').textContent, /都已被排除/);
     await element('#empty-reset').dispatch('click');
@@ -265,6 +283,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     for (const code of singlePoints) await element('#pattern-grid').dispatch('click', { target: target({ dismiss: code }) });
     assert.equal(element('#empty-state').hidden, false);
     assert.equal(element('#total-count').textContent, '48', 'other lengths remain available when one length is entirely hidden');
+    assert.equal(element('#remaining-count').textContent, '0', 'the selected length has no remaining candidates');
     assert.equal(element('#export').disabled, false);
     await element('#export').dispatch('click');
     await settle(() => downloads.length === 3 && !element('#export').disabled, 'export other lengths');
@@ -277,6 +296,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await element('#pattern-grid').dispatch('click', { target: target({ dismiss: '1' }) });
     const different = await registered[0].execute({ included: [2], excluded: [], minLength: 1, maxLength: 1 });
     assert.equal(different.total, 1);
+    assert.equal(element('#remaining-count').textContent, '1', 'old-query exclusions do not affect remaining');
     assert.match(element('#dismissed-summary').textContent, /0 个/);
     await element('#reset').dispatch('click');
     assert.equal(element('#start-point').value, 0);

@@ -38,3 +38,8 @@
 .endpoint-inputs select{padding-left:12px;background-position:right 11px center;font-size:14px}
 
 @media(prefers-reduced-motion:reduce){.detail-pattern .animated-segment{stroke-dashoffset:0;stroke-dasharray:none}}
+
+.results-heading>div{min-width:0}
+.results-heading h2{flex-wrap:wrap;gap:10px;row-gap:8px}
+.remaining-badge{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:1px solid #c0abea38;background:#c0abea0d;color:var(--purple);border-radius:5px;padding:3px 8px;font-size:13px;font-weight:400;letter-spacing:0}
+#remaining-count{font-family:monospace}

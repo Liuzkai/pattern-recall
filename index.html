@@ -60,7 +60,7 @@
         </aside>
 
         <section class="results-panel" aria-labelledby="results-title">
-          <div class="results-heading"><div><div class="eyebrow">POSSIBLE PATTERNS</div><h2 id="results-title">可能的图案 <span class="total-badge" id="total-count">—</span></h2></div><button type="button" id="export" class="secondary-button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg>导出全部</button></div>
+          <div class="results-heading"><div><div class="eyebrow">POSSIBLE PATTERNS</div><h2 id="results-title">可能的图案 <span class="total-badge" id="total-count">—</span><span class="remaining-badge" title="当前点数筛选下，未被排除的图案数量" aria-live="polite" aria-atomic="true">剩余 <span id="remaining-count">—</span></span></h2></div><button type="button" id="export" class="secondary-button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg>导出全部</button></div>
           <div class="result-summary"><span id="result-description">根据你的线索，逐个看看是否熟悉。</span><span class="result-time" id="result-time"></span></div>
           <div class="results-toolbar"><div id="length-filters" class="length-filters" role="group" aria-label="按点数查看候选"></div><label class="number-toggle"><input id="show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>显示点号</label></div>
           <div class="review-toolbar"><label class="number-toggle"><input id="hide-dismissed" type="checkbox"/><span class="switch-ui" aria-hidden="true"></span>隐藏已排除</label><span class="dismissed-summary" id="dismissed-summary">已排除 0 个</span><button id="restore-all" class="text-button" type="button" disabled>恢复全部</button></div>

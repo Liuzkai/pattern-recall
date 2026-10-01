@@ -7,7 +7,7 @@ const PAGE_SIZE = 24;
 const state = {
   points: Array(9).fill('neutral'), mode: 'include', minLength: 4, maxLength: 9, startPoint: 0, endPoint: 0,
   patterns: new Uint32Array(), visible: new Uint32Array(), counts: new Uint32Array(10),
-  remaining: new Uint32Array(), active: new Uint32Array(), activeCounts: new Uint32Array(10),
+  remaining: new Uint32Array(), remainingCounts: new Uint32Array(10), active: new Uint32Array(), activeCounts: new Uint32Array(10),
   dismissed: new Set(), dismissedCount: 0, hideDismissed: false,
   page: 1, length: 0, showNumbers: true, applied: null, elapsed: 0,
   busy: false, exporting: false, worker: null, cancel: null, detail: null, returnFocus: null,
@@ -85,6 +85,7 @@ function refreshCandidates() {
     remainingCounts[String(code).length]--;
     return false;
   }) : state.patterns;
+  state.remainingCounts = remainingCounts;
   state.dismissedCount = state.patterns.length - state.remaining.length;
   state.active = state.hideDismissed ? state.remaining : state.patterns;
   state.activeCounts = state.hideDismissed ? remainingCounts : state.counts;
@@ -102,6 +103,7 @@ function renderResults({ scroll = false } = {}) {
   const pagination = paginatePatterns(state.visible, state.page, PAGE_SIZE);
   state.page = pagination.page;
   $('#total-count').textContent = format(state.active.length);
+  $('#remaining-count').textContent = format(state.length ? state.remainingCounts[state.length] : state.remaining.length);
   if (state.applied) $('#result-description').textContent = `${describe(state.applied)}${state.length ? ` · 正在查看 ${state.length} 点图案` : ''}`;
   $('#dismissed-summary').textContent = `本次候选已排除 ${format(state.dismissedCount)} 个`;
   $('#hide-dismissed').checked = state.hideDismissed;
