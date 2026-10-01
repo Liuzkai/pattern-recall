@@ -1,13 +1,7 @@
+import { connectionAllowed, resolveConnectionRules } from './connections.js';
+
 // Canonical Android point sequences: crossing a midpoint requires it to be visited.
 const midpoint = Array.from({ length: 10 }, () => new Uint8Array(10));
-const adjacent = Array.from({ length: 10 }, () => new Uint8Array(10));
-for (let from = 1; from <= 9; from++) {
-  for (let to = 1; to <= 9; to++) {
-    const rows = Math.abs(Math.floor((from - 1) / 3) - Math.floor((to - 1) / 3));
-    const columns = Math.abs(((from - 1) % 3) - ((to - 1) % 3));
-    adjacent[from][to] = from !== to && rows <= 1 && columns <= 1 ? 1 : 0;
-  }
-}
 for (const [a, b, middle] of [[1, 3, 2], [1, 7, 4], [3, 9, 6], [7, 9, 8], [1, 9, 5], [3, 7, 5], [2, 8, 5], [4, 6, 5]]) {
   midpoint[a][b] = midpoint[b][a] = middle;
 }
@@ -28,20 +22,21 @@ function bitCount(mask) {
   return count;
 }
 
-export function validateConstraints({ included = [], excluded = [], minLength = 4, maxLength = 9, startPoint = 0, endPoint = 0, adjacentOnly = false } = {}) {
+export function validateConstraints({ included = [], excluded = [], minLength = 4, maxLength = 9, startPoint = 0, endPoint = 0, ...connectionOptions } = {}) {
   if (!Number.isInteger(minLength) || !Number.isInteger(maxLength) || minLength < 1 || maxLength > 9 || minLength > maxLength) {
     throw new RangeError('点数范围必须是 1–9 的整数，且最少点数不能超过最多点数');
   }
   for (const point of [startPoint, endPoint]) {
     if (!Number.isInteger(point) || point < 0 || point > 9) throw new RangeError('起点和终点必须是 0–9 的整数，0 表示不确定');
   }
-  if (typeof adjacentOnly !== 'boolean') throw new TypeError('仅连接相邻点规则必须是布尔值');
+  const rules = resolveConnectionRules(connectionOptions);
   const endpointMask = (startPoint ? 1 << (startPoint - 1) : 0) | (endPoint ? 1 << (endPoint - 1) : 0);
-  return { required: pointsToMask(included, '必含点') | endpointMask, forbidden: pointsToMask(excluded, '排除点'), minLength, maxLength, startPoint, endPoint, adjacentOnly };
+  return { required: pointsToMask(included, '必含点') | endpointMask, forbidden: pointsToMask(excluded, '排除点'), minLength, maxLength, startPoint, endPoint, ...rules, adjacentOnly: rules.excludeLongDiagonal && rules.excludeLongStraight };
 }
 
 export function enumeratePatterns(constraints = {}) {
-  const { required, forbidden, minLength, maxLength, startPoint, endPoint, adjacentOnly } = validateConstraints(constraints);
+  const rules = validateConstraints(constraints);
+  const { required, forbidden, minLength, maxLength, startPoint, endPoint } = rules;
   const counts = new Uint32Array(10);
   if ((required & forbidden) || bitCount(required) > maxLength || 9 - bitCount(forbidden) < minLength) {
     return { patterns: new Uint32Array(0), counts, total: 0 };
@@ -57,7 +52,7 @@ export function enumeratePatterns(constraints = {}) {
     for (let next = 1; next <= 9; next++) {
       const bit = 1 << (next - 1);
       if ((used | forbidden) & bit) continue;
-      if (adjacentOnly && !adjacent[last][next]) continue;
+      if (!connectionAllowed(last, next, rules)) continue;
       const middle = midpoint[last][next];
       if (middle && !(used & (1 << (middle - 1)))) continue;
       visit(next, used | bit, depth + 1, code * 10 + next);

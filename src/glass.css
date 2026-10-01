@@ -135,6 +135,7 @@ select option { background: #203047; color: var(--text); }
 .length-tick:before { background: rgba(215, 235, 255, .16); }
 .length-tick.active { color: var(--lime); }
 .length-tick.active:before { background: var(--lime); opacity: .8; }
+.connection-rule + .connection-rule { margin-top: 17px; }
 .constraint-summary {
   background: rgba(213, 232, 255, .065);
   border: 1px solid rgba(220, 237, 255, .1);

@@ -92,6 +92,12 @@ function target(dataset) {
   } };
 }
 function runQuery(input) { return registered[0].execute({ adjacentOnly: false, ...input }); }
+async function setConnectionRules(diagonal, straight) {
+  for (const [id, checked] of [['exclude-long-diagonal', diagonal], ['exclude-long-straight', straight]]) {
+    element(`#${id}`).checked = checked;
+    await element(`#${id}`).dispatch('change');
+  }
+}
 async function selectPoint(point) {
   await element('#point-grid').dispatch('click', { target: target({ point: String(point) }) });
 }
@@ -126,8 +132,27 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
   try {
     await import('../src/app.js');
     await settle(() => element('#total-count').textContent === '10,096', 'default adjacent enumeration');
-    assert.equal(element('#adjacent-only').checked, true);
+    assert.equal(element('#exclude-long-diagonal').checked, true);
+    assert.equal(element('#exclude-long-straight').checked, true);
     assert.equal(element('#remaining-count').textContent, '10,096');
+    await setConnectionRules(false, true);
+    assert.match(element('#result-status').textContent, /线索已调整/);
+    await element('#clue-form').dispatch('submit');
+    await settle(() => element('#total-count').textContent === '189,744', 'straight-only crossing exclusion');
+    assert.match(element('#result-description').textContent, /排除直线跨格/);
+    assert.doesNotMatch(element('#result-description').textContent, /排除斜线跨格/);
+    await setConnectionRules(true, false);
+    await element('#clue-form').dispatch('submit');
+    await settle(() => element('#total-count').textContent === '29,312', 'diagonal-only crossing exclusion');
+    assert.match(element('#result-description').textContent, /排除斜线跨格/);
+    assert.doesNotMatch(element('#result-description').textContent, /排除直线跨格/);
+    const mixedTool = await runQuery({ included: [], excluded: [], minLength: 4, maxLength: 9, adjacentOnly: true, excludeLongDiagonal: false });
+    assert.equal(mixedTool.enumeratedTotal, 189744, 'explicit individual option overrides the legacy combined default');
+    assert.equal(element('#exclude-long-diagonal').checked, false);
+    assert.equal(element('#exclude-long-straight').checked, true);
+    await setConnectionRules(true, true);
+    await element('#clue-form').dispatch('submit');
+    await settle(() => element('#total-count').textContent === '10,096', 'restore both crossing exclusions');
     const sketchPoints = () => [...element('#sketch-sequence').innerHTML.matchAll(/class="seq-number">(\d)/g)].map(match => Number(match[1]));
     const sketchClick = point => element('#sketch-pad').dispatch('click', { detail: 0, target: target({ sketchPoint: String(point) }) });
     const pointer = (point, pointerId = 1) => {
@@ -185,8 +210,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.deepEqual(sketchPoints(), [1, 5]);
     assert.equal(element('#sketch-pad').capturedPointer, null);
     await element('#sketch-clear').dispatch('click');
-    element('#adjacent-only').checked = false;
-    await element('#adjacent-only').dispatch('change');
+    await setConnectionRules(false, false);
     assert.match(element('#result-status').textContent, /线索已调整/);
     await element('#clue-form').dispatch('submit');
     await settle(() => element('#total-count').textContent === '389,112', 'initial enumeration');
@@ -198,12 +222,21 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await sketchClick(1);
     await sketchClick(3);
     assert.deepEqual(sketchPoints(), [2, 1, 3]);
-    element('#adjacent-only').checked = true;
-    await element('#adjacent-only').dispatch('change');
+    await setConnectionRules(false, true);
     assert.deepEqual(sketchPoints(), [2, 1, 3], 'rule changes preserve the drawing');
     assert.match(element('#sketch-status').textContent, /已有连线包含跨格连接/);
-    element('#adjacent-only').checked = false;
-    await element('#adjacent-only').dispatch('change');
+    await setConnectionRules(true, false);
+    assert.doesNotMatch(element('#sketch-status').textContent, /已有连线包含跨格连接/, 'straight drawing is unaffected by diagonal exclusion');
+    await setConnectionRules(false, false);
+    await element('#sketch-clear').dispatch('click');
+    await sketchClick(1);
+    await sketchClick(8);
+    assert.deepEqual(sketchPoints(), [1, 8]);
+    await setConnectionRules(false, true);
+    assert.doesNotMatch(element('#sketch-status').textContent, /已有连线包含跨格连接/, 'diagonal drawing is unaffected by straight exclusion');
+    await setConnectionRules(true, false);
+    assert.match(element('#sketch-status').textContent, /已有连线包含跨格连接/);
+    await setConnectionRules(false, false);
     await element('#sketch-clear').dispatch('click');
     assert.equal(element('#remaining-count').textContent, '389,112');
     assert.equal((element('#pattern-grid').innerHTML.match(/data-pattern=/g) || []).length, 24);
@@ -265,9 +298,9 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     failNextWorker = true;
     await element('#reset').dispatch('click');
     await settle(() => element('#result-status').textContent.includes('无法启动'), 'worker failure');
-    assert.equal(element('#adjacent-only').checked, true);
-    element('#adjacent-only').checked = false;
-    await element('#adjacent-only').dispatch('change');
+    assert.equal(element('#exclude-long-diagonal').checked, true);
+    assert.equal(element('#exclude-long-straight').checked, true);
+    await setConnectionRules(false, false);
     await element('#clue-form').dispatch('submit');
     await settle(() => element('#total-count').textContent === '389,112', 'worker retry');
     assert.equal(element('#empty-state').hidden, true);
@@ -390,7 +423,8 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await element('#reset').dispatch('click');
     assert.equal(element('#start-point').value, 0);
     assert.equal(element('#end-point').value, 0);
-    assert.equal(element('#adjacent-only').checked, true);
+    assert.equal(element('#exclude-long-diagonal').checked, true);
+    assert.equal(element('#exclude-long-straight').checked, true);
     await settle(() => element('#total-count').textContent === '10,096', 'reset restores adjacency and preserves unrelated single-point exclusion');
   } finally {
     for (const timer of timers) clearTimeout(timer);

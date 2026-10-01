@@ -21,6 +21,53 @@ function independentlyValid(code) {
 
 const all = enumeratePatterns({ minLength: 1, maxLength: 9 });
 
+test('diagonal and straight crossing exclusions independently filter every Android candidate', () => {
+  const expectedTotals = [[389112, 189744], [29312, 10096]];
+  const queryTotals = [[399, 244], [114, 50]];
+  for (const excludeLongDiagonal of [false, true]) {
+    for (const excludeLongStraight of [false, true]) {
+      // Derive the expected set directly from geometry, independently of the shared classifier.
+      const matches = code => {
+        const points = String(code).split('').map(Number);
+        return points.slice(1).every((point, i) => {
+          const previous = points[i];
+          const rows = Math.abs(Math.floor((point - 1) / 3) - Math.floor((previous - 1) / 3));
+          const columns = Math.abs(((point - 1) % 3) - ((previous - 1) % 3));
+          if (Math.max(rows, columns) <= 1) return true;
+          return rows === 0 || columns === 0 ? !excludeLongStraight : !excludeLongDiagonal;
+        });
+      };
+      const rules = { excludeLongDiagonal, excludeLongStraight };
+      const result = enumeratePatterns(rules);
+      const expected = all.patterns.filter(code => String(code).length >= 4 && matches(code));
+      assert.deepEqual(result.patterns, expected);
+      assert.equal(result.total, expectedTotals[Number(excludeLongDiagonal)][Number(excludeLongStraight)]);
+      const counts = new Uint32Array(10);
+      for (const code of expected) counts[String(code).length]++;
+      assert.deepEqual(result.counts, counts);
+      const query = { included: [7, 8, 9], excluded: [3, 6], endPoint: 9, minLength: 4, maxLength: 6 };
+      const filtered = enumeratePatterns({ ...query, ...rules });
+      assert.deepEqual(filtered.patterns, enumeratePatterns(query).patterns.filter(matches));
+      assert.equal(filtered.total, queryTotals[Number(excludeLongDiagonal)][Number(excludeLongStraight)]);
+    }
+  }
+});
+
+test('individual crossing rules preserve neighbours, midpoint rules, and legacy option overrides', () => {
+  const diagonalOnly = { excludeLongDiagonal: true, excludeLongStraight: false, minLength: 1, maxLength: 3 };
+  const straightOnly = { excludeLongDiagonal: false, excludeLongStraight: true, minLength: 1, maxLength: 3 };
+  const diagonal = new Set(enumeratePatterns(diagonalOnly).patterns);
+  const straight = new Set(enumeratePatterns(straightOnly).patterns);
+  for (const code of [18, 16, 38, 519, 537]) { assert.ok(!diagonal.has(code)); assert.ok(straight.has(code)); }
+  for (const code of [213, 417, 546, 528]) { assert.ok(diagonal.has(code)); assert.ok(!straight.has(code)); }
+  for (const code of [15, 159, 147, 123]) { assert.ok(diagonal.has(code)); assert.ok(straight.has(code)); }
+  assert.ok(!diagonal.has(17), 'permitting straight crossings still requires a previously visited midpoint');
+  assert.deepEqual(enumeratePatterns({ adjacentOnly: true, excludeLongDiagonal: false }).patterns, enumeratePatterns({ excludeLongStraight: true }).patterns);
+  assert.deepEqual(enumeratePatterns({ adjacentOnly: false, excludeLongDiagonal: true }).patterns, enumeratePatterns({ excludeLongDiagonal: true }).patterns);
+  assert.throws(() => enumeratePatterns({ excludeLongDiagonal: 'false' }), TypeError);
+  assert.throws(() => enumeratePatterns({ excludeLongStraight: 1 }), TypeError);
+});
+
 test('adjacent rule matches filtering the Android search space and preserves diagonal neighbours', () => {
   const adjacent = code => {
     const points = String(code).split('').map(Number);

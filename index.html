@@ -54,7 +54,10 @@
               <div class="grid-legend"><span><i class="legend-dot included"></i>包含 <b id="included-count">0</b></span><span><i class="legend-dot excluded"></i>排除 <b id="excluded-count">0</b></span><span><i class="legend-dot neutral"></i>不确定 <b id="neutral-count">9</b></span></div>
               <p class="field-hint">先选模式，再点击九宫格。再次点击可取消。</p>
             </fieldset>
-            <div class="connection-option"><label class="number-toggle"><input id="adjacent-only" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>仅连接相邻点</label><p class="field-hint">允许相邻斜线；禁止跨整行或整列，如 1 → 8。</p></div>
+            <div class="connection-option">
+              <div class="connection-rule"><label class="number-toggle"><input id="exclude-long-diagonal" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>排除斜线跨格</label><p class="field-hint">排除 1 → 8、1 → 9 等长斜线，允许 1 → 5。</p></div>
+              <div class="connection-rule"><label class="number-toggle"><input id="exclude-long-straight" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>排除直线跨格</label><p class="field-hint">排除 1 → 7、1 → 3 等长直线，允许 1 → 4。</p></div>
+            </div>
             <fieldset class="length-section">
               <legend><span class="step-number">02</span>大概连接了多少个点？</legend>
               <div class="length-inputs"><label for="min-length"><span>最少</span><select id="min-length" name="minLength" aria-label="最少点数"></select></label><span class="range-divider">—</span><label for="max-length"><span>最多</span><select id="max-length" name="maxLength" aria-label="最多点数"></select></label></div>
@@ -70,7 +73,7 @@
             <p class="form-error" id="form-error" role="alert" hidden></p>
             <button class="generate-button" id="generate" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>列举可能的图案</span><kbd>↵</kbd></button>
           </form>
-          <details class="rules"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>图案规则<span>＋</span></summary><div>每个点只能使用一次。「仅连接相邻点」默认开启，只允许相邻的横、竖和对角线；1 → 8、1 → 3 等跨格连线不会出现。关闭后使用 Android 常见规则：连线跨过一个点时，这个中间点必须已经使用。包含的点不限定先后顺序，反向图案分别列举。</div></details>
+          <details class="rules"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>图案规则<span>＋</span></summary><div>每个点只能使用一次。斜线与直线的跨格排除可独立切换，默认均开启，只允许相邻横线、竖线及斜线。1 → 8 属于斜线跨格，1 → 7 属于直线跨格。允许跨格时仍遵循 Android 规则：连线跨过的中间点必须已经使用。包含的点不限定先后顺序，反向图案分别列举。</div></details>
         </aside>
 
         <section class="results-panel" aria-labelledby="results-title">

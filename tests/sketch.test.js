@@ -2,6 +2,28 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { appendSketchPoint, pointsAlongSegment, sketchMatchesRule } from '../src/sketch.js';
 
+test('sketch independently excludes diagonal and straight crossings while inserting permitted midpoints', () => {
+  for (const excludeLongDiagonal of [false, true]) {
+    for (const excludeLongStraight of [false, true]) {
+      const rules = { excludeLongDiagonal, excludeLongStraight };
+      assert.equal(appendSketchPoint([1], 8, rules).changed, !excludeLongDiagonal);
+      assert.equal(appendSketchPoint([5, 1], 9, rules).changed, !excludeLongDiagonal);
+      assert.equal(appendSketchPoint([4, 1], 7, rules).changed, !excludeLongStraight);
+      assert.equal(appendSketchPoint([2, 1], 3, rules).changed, !excludeLongStraight);
+      assert.deepEqual(appendSketchPoint([1], 5, rules).points, [1, 5]);
+      assert.deepEqual(appendSketchPoint([1], 7, rules).points, excludeLongStraight ? [1] : [1, 4, 7]);
+      assert.deepEqual(appendSketchPoint([1], 9, rules).points, excludeLongDiagonal ? [1] : [1, 5, 9]);
+      assert.equal(sketchMatchesRule([1, 8], rules), !excludeLongDiagonal);
+      assert.equal(sketchMatchesRule([4, 1, 7], rules), !excludeLongStraight);
+    }
+  }
+  assert.match(appendSketchPoint([1], 8).reason, /斜线跨格/);
+  assert.match(appendSketchPoint([4, 1], 7).reason, /直线跨格/);
+  assert.equal(appendSketchPoint([1], 8, { adjacentOnly: undefined }).changed, false, 'undefined keeps the legacy default exclusion');
+  assert.equal(appendSketchPoint([1], 8, { adjacentOnly: undefined, excludeLongDiagonal: false }).changed, true, 'explicit individual fields still override the default');
+  assert.throws(() => appendSketchPoint([1], 8, { excludeLongDiagonal: 'false' }), TypeError);
+});
+
 test('sketch accepts adjacent diagonals and rejects long moves without changing the input', () => {
   const input = [1];
   assert.deepEqual(appendSketchPoint(input, 5).points, [1, 5]);

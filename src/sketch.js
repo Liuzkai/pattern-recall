@@ -1,15 +1,16 @@
 import { position, sequenceMarkup } from './render.js';
+import { connectionAllowed, connectionType, resolveConnectionRules } from './connections.js';
 
 function validatePoint(point) {
   if (!Number.isInteger(point) || point < 1 || point > 9) throw new RangeError('试画点号必须是 1–9 的整数');
 }
 
-export function appendSketchPoint(sequence, next, { adjacentOnly = true } = {}) {
+export function appendSketchPoint(sequence, next, options = {}) {
   validatePoint(next);
   if (!Array.isArray(sequence)) throw new TypeError('试画序列必须是数组');
   sequence.forEach(validatePoint);
   if (new Set(sequence).size !== sequence.length) throw new RangeError('试画序列不能包含重复点');
-  if (typeof adjacentOnly !== 'boolean') throw new TypeError('连线规则必须是布尔值');
+  const rules = resolveConnectionRules({ ...options, adjacentOnly: options.adjacentOnly === undefined ? true : options.adjacentOnly });
   const points = sequence.slice();
   if (points.includes(next)) return { points, added: [], changed: false, reason: `点 ${next} 已经使用过了` };
   const added = [];
@@ -17,8 +18,9 @@ export function appendSketchPoint(sequence, next, { adjacentOnly = true } = {}) 
     const last = points.at(-1);
     const rowA = Math.floor((last - 1) / 3), colA = (last - 1) % 3;
     const rowB = Math.floor((next - 1) / 3), colB = (next - 1) % 3;
-    if (adjacentOnly && (Math.abs(rowB - rowA) > 1 || Math.abs(colB - colA) > 1)) {
-      return { points, added, changed: false, reason: `${last} → ${next} 跨过了整行或整列，请连接相邻点` };
+    if (!connectionAllowed(last, next, rules)) {
+      const label = connectionType(last, next) === 'diagonal' ? '斜线' : '直线';
+      return { points, added, changed: false, reason: `${last} → ${next} 属于${label}跨格，当前已排除` };
     }
     const middleRow = (rowA + rowB) / 2, middleCol = (colA + colB) / 2;
     if (Number.isInteger(middleRow) && Number.isInteger(middleCol)) {
@@ -30,10 +32,11 @@ export function appendSketchPoint(sequence, next, { adjacentOnly = true } = {}) 
   return { points: [...points, ...added], added, changed: true, reason: '' };
 }
 
-export function sketchMatchesRule(sequence, adjacentOnly) {
+export function sketchMatchesRule(sequence, rules) {
+  const options = typeof rules === 'boolean' ? { adjacentOnly: rules } : rules;
   let accepted = [];
   for (const point of sequence) {
-    const result = appendSketchPoint(accepted, point, { adjacentOnly });
+    const result = appendSketchPoint(accepted, point, options);
     if (!result.changed || result.added.length !== 1) return false;
     accepted = result.points;
   }
@@ -53,7 +56,7 @@ export function pointsAlongSegment(from, to, radius = 12) {
   return hits.sort((a, b) => a.t - b.t).map(hit => hit.point);
 }
 
-export function createSketchTool({ getAdjacentOnly }) {
+export function createSketchTool({ getConnectionRules }) {
   const $ = selector => document.querySelector(selector);
   const pad = $('#sketch-pad');
   const numberToggle = $('#sketch-show-numbers');
@@ -83,13 +86,15 @@ export function createSketchTool({ getAdjacentOnly }) {
     $('#sketch-count').textContent = `${points.length} / 9 点`;
     $('#sketch-undo').disabled = !points.length;
     $('#sketch-clear').disabled = !points.length;
-    const conflict = !sketchMatchesRule(points, getAdjacentOnly());
-    $('#sketch-status').textContent = reason || (conflict ? '已有连线包含跨格连接，可撤回或清空后重画' : getAdjacentOnly() ? '仅连接相邻点，允许相邻斜线' : 'Android 连线规则，经过中间点会自动补入');
+    const rules = getConnectionRules();
+    const conflict = !sketchMatchesRule(points, rules);
+    const hint = rules.excludeLongDiagonal && rules.excludeLongStraight ? '仅连接相邻点，允许相邻斜线' : rules.excludeLongDiagonal ? '排除斜线跨格，允许直线跨格' : rules.excludeLongStraight ? '排除直线跨格，允许斜线跨格' : 'Android 连线规则，经过中间点会自动补入';
+    $('#sketch-status').textContent = reason || (conflict ? '已有连线包含跨格连接，已被当前规则排除，可撤回或清空后重画' : hint);
     $('#sketch-status').classList.toggle('is-warning', !!reason || conflict);
   }
 
   function addPoint(point) {
-    const result = appendSketchPoint(points, point, { adjacentOnly: getAdjacentOnly() });
+    const result = appendSketchPoint(points, point, getConnectionRules());
     points = result.points;
     reason = result.reason;
     render();
