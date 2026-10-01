@@ -47,6 +47,11 @@
               <div class="length-track" aria-hidden="true" id="length-track"></div>
               <p class="field-hint">常见手机图案为 4–9 个点，可按记忆调整。</p>
             </fieldset>
+            <fieldset class="endpoint-section">
+              <legend><span class="step-number">03</span>还记得起点和终点吗？</legend>
+              <div class="endpoint-inputs"><label for="start-point"><span>第一个点</span><select id="start-point" name="startPoint"><option value="0">不确定</option></select></label><label for="end-point"><span>最后一个点</span><select id="end-point" name="endPoint"><option value="0">不确定</option></select></label></div>
+              <p class="field-hint">选择后会自动包含该点；不确定时不限制。</p>
+            </fieldset>
             <div id="constraint-summary" class="constraint-summary">暂无点位限制 · 4–9 个点</div>
             <p class="form-error" id="form-error" role="alert" hidden></p>
             <button class="generate-button" id="generate" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>列举可能的图案</span><kbd>↵</kbd></button>
@@ -58,9 +63,10 @@
           <div class="results-heading"><div><div class="eyebrow">POSSIBLE PATTERNS</div><h2 id="results-title">可能的图案 <span class="total-badge" id="total-count">—</span></h2></div><button type="button" id="export" class="secondary-button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg>导出全部</button></div>
           <div class="result-summary"><span id="result-description">根据你的线索，逐个看看是否熟悉。</span><span class="result-time" id="result-time"></span></div>
           <div class="results-toolbar"><div id="length-filters" class="length-filters" role="group" aria-label="按点数查看候选"></div><label class="number-toggle"><input id="show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>显示点号</label></div>
+          <div class="review-toolbar"><label class="number-toggle"><input id="hide-dismissed" type="checkbox"/><span class="switch-ui" aria-hidden="true"></span>隐藏已排除</label><span class="dismissed-summary" id="dismissed-summary">已排除 0 个</span><button id="restore-all" class="text-button" type="button" disabled>恢复全部</button></div>
           <div id="result-status" class="result-status" role="status" aria-live="polite"></div>
           <div class="pattern-grid" id="pattern-grid"></div>
-          <div id="empty-state" class="empty-state" hidden><svg viewBox="0 0 90 90" aria-hidden="true"><path d="m23 23 44 44M67 23 23 67"/><circle cx="23" cy="23" r="5"/><circle cx="67" cy="23" r="5"/><circle cx="23" cy="67" r="5"/><circle cx="67" cy="67" r="5"/><circle cx="45" cy="45" r="5"/></svg><h3>这些线索暂时没有交集</h3><p>试试减少必含点、取消部分排除点，或扩大点数范围。</p><button type="button" id="empty-reset" class="secondary-button">重置线索</button></div>
+          <div id="empty-state" class="empty-state" hidden><svg viewBox="0 0 90 90" aria-hidden="true"><path d="m23 23 44 44M67 23 23 67"/><circle cx="23" cy="23" r="5"/><circle cx="67" cy="23" r="5"/><circle cx="23" cy="67" r="5"/><circle cx="67" cy="67" r="5"/><circle cx="45" cy="45" r="5"/></svg><h3 id="empty-title">这些线索暂时没有交集</h3><p id="empty-description">试试减少必含点、取消部分排除点，或扩大点数范围。</p><button type="button" id="empty-reset" class="secondary-button">重置线索</button></div>
           <nav class="pagination" id="pagination" aria-label="候选图案分页"><span id="page-description"></span><div class="page-controls"><button id="prev-page" class="page-button" type="button" aria-label="上一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button><label class="page-jump"><input id="page-input" type="number" min="1" value="1" aria-label="跳转页码"/><span id="page-total">/ 1</span></label><button id="next-page" class="page-button" type="button" aria-label="下一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button></div></nav>
           <div class="results-footnote"><span class="start-key"></span>绿色圆点为起点，线上的箭头表示连接方向。点击图案查看绘制顺序。</div>
         </section>

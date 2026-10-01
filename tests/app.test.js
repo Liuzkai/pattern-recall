@@ -80,7 +80,10 @@ async function settle(predicate, label) {
 function target(dataset) {
   const button = new Element('event-target');
   button.dataset = dataset;
-  return { closest: () => button };
+  return { closest: selector => {
+    const key = selector.match(/^\[data-([a-z-]+)\]$/)?.[1];
+    return key && key in dataset ? button : null;
+  } };
 }
 async function selectPoint(point) {
   await element('#point-grid').dispatch('click', { target: target({ point: String(point) }) });
@@ -186,6 +189,99 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(newest.total, 1);
     assert.equal(element('#total-count').textContent, '1');
     assert.match(element('#pattern-grid').innerHTML, /data-pattern="2"/);
+
+    const endpoints = { included: [], excluded: [], minLength: 4, maxLength: 6, startPoint: 1, endPoint: 9 };
+    const endpointResult = await registered[0].execute(endpoints);
+    assert.equal(endpointResult.total, 462);
+    assert.deepEqual(endpointResult.counts.slice(4, 7), [18, 92, 352]);
+    assert.ok(endpointResult.firstPage.every(code => code.startsWith('1') && code.endsWith('9')));
+    assert.match(element('#result-description').textContent, /起点 1 · 终点 9/);
+    const dismissed = endpointResult.firstPage[0];
+    await element('#pattern-grid').dispatch('click', { target: target({ dismiss: dismissed }) });
+    assert.equal(element('#pattern-dialog').open, false, 'dismiss must not open details');
+    assert.match(element('#pattern-grid').innerHTML, /class="pattern-card is-dismissed"/);
+    assert.match(element('#pattern-grid').innerHTML, new RegExp(`data-dismiss="${dismissed}" aria-pressed="true"`));
+    assert.match(element('#pattern-grid').innerHTML, /<\/button><button class="pattern-dismiss"/, 'view and dismiss controls are siblings');
+    assert.match(element('#dismissed-summary').textContent, /1 个/);
+    assert.equal(element('#total-count').textContent, '462', 'dimmed candidates remain visible until hiding is enabled');
+
+    element('#hide-dismissed').checked = true;
+    await element('#hide-dismissed').dispatch('change');
+    assert.equal(element('#total-count').textContent, '461');
+    assert.doesNotMatch(element('#pattern-grid').innerHTML, new RegExp(`data-pattern="${dismissed}"`));
+    assert.match(element('#pattern-grid').innerHTML, /#0002/, 'source numbering remains stable after hiding');
+    const regenerated = await registered[0].execute(endpoints);
+    assert.equal(regenerated.total, 461, 'exclusions survive regeneration');
+    assert.equal(regenerated.enumeratedTotal, 462);
+    await element('#export').dispatch('click');
+    element('#hide-dismissed').checked = false;
+    await element('#hide-dismissed').dispatch('change');
+    await element('#restore-all').dispatch('click');
+    await settle(() => downloads.length === 2 && !element('#export').disabled, 'filtered export snapshot');
+    const filteredCsv = await downloads[1].blob.text();
+    assert.equal(filteredCsv.trim().split('\r\n').length, 462, 'snapshot retains the 461 candidates at export start');
+    assert.ok(!filteredCsv.includes(`,${dismissed}\r\n`));
+    assert.match(downloads[1].filename, /起点1_终点9_已过滤排除图案/);
+    assert.equal(element('#total-count').textContent, '462');
+
+    element('#start-point').value = '9';
+    await element('#start-point').dispatch('change');
+    assert.equal(element('#generate').disabled, true);
+    assert.match(element('#form-error').textContent, /起点和终点不能相同/);
+    element('#start-point').value = '1';
+    await element('#start-point').dispatch('change');
+    assert.equal(element('#generate').disabled, false);
+    const unchanged = element('#constraint-summary').textContent;
+    await assert.rejects(() => registered[0].execute({ ...endpoints, excluded: [1] }), /同时必含和排除/);
+    assert.equal(element('#constraint-summary').textContent, unchanged);
+    await assert.rejects(() => registered[0].execute({ ...endpoints, maxLength: 1, minLength: 1 }), /2 个不同点/);
+
+    await registered[0].execute({ included: [], excluded: [], minLength: 1, maxLength: 9, startPoint: 5, endPoint: 5 });
+    assert.equal(element('#total-count').textContent, '1');
+    assert.match(element('#pattern-grid').innerHTML, /data-pattern="5"/);
+    await element('#pattern-grid').dispatch('click', { target: target({ dismiss: '5' }) });
+    element('#hide-dismissed').checked = true;
+    await element('#hide-dismissed').dispatch('change');
+    assert.equal(element('#total-count').textContent, '0');
+    assert.equal(element('#export').disabled, true);
+    assert.match(element('#empty-title').textContent, /都已被排除/);
+    await element('#empty-reset').dispatch('click');
+    assert.equal(element('#total-count').textContent, '1');
+    assert.equal(element('#empty-state').hidden, true);
+    assert.equal(focused, '#hide-dismissed', 'restoring hidden candidates must leave focus on a visible control');
+
+    await registered[0].execute({ included: [], excluded: [], minLength: 2, maxLength: 2 });
+    element('#page-input').value = '3';
+    await element('#page-input').dispatch('change');
+    const tail = [...element('#pattern-grid').innerHTML.matchAll(/data-pattern="(\d+)"/g)].map(match => match[1]);
+    assert.equal(tail.length, 8);
+    for (const code of tail) await element('#pattern-grid').dispatch('click', { target: target({ dismiss: code }) });
+    assert.equal(element('#page-input').value, 2, 'hiding a complete tail page clamps to the previous page');
+    assert.equal(element('#total-count').textContent, '48');
+
+    await registered[0].execute({ included: [], excluded: [], minLength: 1, maxLength: 2 });
+    await element('#length-filters').dispatch('click', { target: target({ length: '1' }) });
+    const singlePoints = [...element('#pattern-grid').innerHTML.matchAll(/data-pattern="(\d+)"/g)].map(match => match[1]);
+    for (const code of singlePoints) await element('#pattern-grid').dispatch('click', { target: target({ dismiss: code }) });
+    assert.equal(element('#empty-state').hidden, false);
+    assert.equal(element('#total-count').textContent, '48', 'other lengths remain available when one length is entirely hidden');
+    assert.equal(element('#export').disabled, false);
+    await element('#export').dispatch('click');
+    await settle(() => downloads.length === 3 && !element('#export').disabled, 'export other lengths');
+    assert.equal((await downloads[2].blob.text()).trim().split('\r\n').length, 49);
+    await element('#empty-reset').dispatch('click');
+    assert.equal(element('#total-count').textContent, '65');
+    assert.equal(element('#empty-state').hidden, true);
+
+    // Old-query exclusions must not reduce a new query's unrelated result count.
+    await element('#pattern-grid').dispatch('click', { target: target({ dismiss: '1' }) });
+    const different = await registered[0].execute({ included: [2], excluded: [], minLength: 1, maxLength: 1 });
+    assert.equal(different.total, 1);
+    assert.match(element('#dismissed-summary').textContent, /0 个/);
+    await element('#reset').dispatch('click');
+    assert.equal(element('#start-point').value, 0);
+    assert.equal(element('#end-point').value, 0);
+    await settle(() => element('#total-count').textContent === '389,112', 'reset preserves unrelated single-point exclusion');
   } finally {
     for (const timer of timers) clearTimeout(timer);
     globalThis.setTimeout = nativeSetTimeout;

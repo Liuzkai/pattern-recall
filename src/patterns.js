@@ -20,26 +20,31 @@ function bitCount(mask) {
   return count;
 }
 
-export function validateConstraints({ included = [], excluded = [], minLength = 4, maxLength = 9 } = {}) {
+export function validateConstraints({ included = [], excluded = [], minLength = 4, maxLength = 9, startPoint = 0, endPoint = 0 } = {}) {
   if (!Number.isInteger(minLength) || !Number.isInteger(maxLength) || minLength < 1 || maxLength > 9 || minLength > maxLength) {
     throw new RangeError('点数范围必须是 1–9 的整数，且最少点数不能超过最多点数');
   }
-  return { required: pointsToMask(included, '必含点'), forbidden: pointsToMask(excluded, '排除点'), minLength, maxLength };
+  for (const point of [startPoint, endPoint]) {
+    if (!Number.isInteger(point) || point < 0 || point > 9) throw new RangeError('起点和终点必须是 0–9 的整数，0 表示不确定');
+  }
+  const endpointMask = (startPoint ? 1 << (startPoint - 1) : 0) | (endPoint ? 1 << (endPoint - 1) : 0);
+  return { required: pointsToMask(included, '必含点') | endpointMask, forbidden: pointsToMask(excluded, '排除点'), minLength, maxLength, startPoint, endPoint };
 }
 
 export function enumeratePatterns(constraints = {}) {
-  const { required, forbidden, minLength, maxLength } = validateConstraints(constraints);
+  const { required, forbidden, minLength, maxLength, startPoint, endPoint } = validateConstraints(constraints);
   const counts = new Uint32Array(10);
   if ((required & forbidden) || bitCount(required) > maxLength || 9 - bitCount(forbidden) < minLength) {
     return { patterns: new Uint32Array(0), counts, total: 0 };
   }
   const output = [];
   function visit(last, used, depth, code) {
-    if (depth >= minLength && (used & required) === required) {
+    if (depth >= minLength && (used & required) === required && (!endPoint || last === endPoint)) {
       output.push(code);
       counts[depth]++;
     }
-    if (depth === maxLength || bitCount(required & ~used) > maxLength - depth) return;
+    // Once the specified endpoint is used, extending would make it impossible to finish there.
+    if ((endPoint && last === endPoint) || depth === maxLength || bitCount(required & ~used) > maxLength - depth) return;
     for (let next = 1; next <= 9; next++) {
       const bit = 1 << (next - 1);
       if ((used | forbidden) & bit) continue;
@@ -49,6 +54,7 @@ export function enumeratePatterns(constraints = {}) {
     }
   }
   for (let start = 1; start <= 9; start++) {
+    if (startPoint && start !== startPoint) continue;
     const bit = 1 << (start - 1);
     if (!(forbidden & bit)) visit(start, bit, 1, start);
   }

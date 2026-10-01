@@ -21,6 +21,44 @@ function independentlyValid(code) {
 
 const all = enumeratePatterns({ minLength: 1, maxLength: 9 });
 
+test('start and end restrictions match independently filtering the complete search space', () => {
+  for (const query of [
+    { startPoint: 1, endPoint: 9, minLength: 4, maxLength: 6 },
+    { startPoint: 1, minLength: 4, maxLength: 9 },
+    { endPoint: 1, minLength: 4, maxLength: 9 },
+    { startPoint: 2, endPoint: 3, included: [1], minLength: 3, maxLength: 3 },
+    { startPoint: 5, endPoint: 5, minLength: 1, maxLength: 9 },
+  ]) {
+    const expected = all.patterns.filter(code => {
+      const sequence = String(code);
+      return sequence.length >= query.minLength && sequence.length <= query.maxLength &&
+        (!query.startPoint || sequence.startsWith(String(query.startPoint))) &&
+        (!query.endPoint || sequence.endsWith(String(query.endPoint))) &&
+        (!query.included || query.included.every(point => sequence.includes(String(point))));
+    });
+    assert.deepEqual(enumeratePatterns(query).patterns, expected);
+  }
+  const endpoints = enumeratePatterns({ startPoint: 1, endPoint: 9, minLength: 4, maxLength: 6 });
+  assert.equal(endpoints.total, 462);
+  assert.deepEqual(Array.from(endpoints.counts).slice(4, 7), [18, 92, 352]);
+  assert.equal(enumeratePatterns({ startPoint: 1 }).total, 38042);
+  assert.equal(enumeratePatterns({ endPoint: 1 }).total, 54374);
+});
+
+test('endpoints respect midpoint, repeated-point, capacity, conflict, and input rules', () => {
+  assert.deepEqual(Array.from(enumeratePatterns({ startPoint: 5, endPoint: 5, minLength: 1, maxLength: 9 }).patterns), [5]);
+  for (const query of [
+    { startPoint: 5, endPoint: 5, minLength: 2, maxLength: 9 },
+    { startPoint: 1, excluded: [1] },
+    { endPoint: 9, excluded: [9] },
+    { startPoint: 1, endPoint: 9, minLength: 1, maxLength: 1 },
+    { startPoint: 1, endPoint: 3, minLength: 2, maxLength: 2 },
+  ]) assert.equal(enumeratePatterns(query).total, 0);
+  assert.throws(() => enumeratePatterns({ startPoint: 10 }), RangeError);
+  assert.throws(() => enumeratePatterns({ endPoint: -1 }), RangeError);
+  assert.throws(() => enumeratePatterns({ startPoint: '1' }), RangeError);
+});
+
 test('complete enumeration matches each known count, with no duplicates or illegal midpoints', () => {
   assert.deepEqual(Array.from(all.counts), [0, 9, 56, 320, 1624, 7152, 26016, 72912, 140704, 140704]);
   assert.equal(all.total, 389497);
