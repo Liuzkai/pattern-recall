@@ -17,8 +17,8 @@ test('sketch independently excludes diagonal and straight crossings while insert
       assert.equal(sketchMatchesRule([4, 1, 7], rules), !excludeLongStraight);
     }
   }
-  assert.match(appendSketchPoint([1], 8).reason, /斜线跨格/);
-  assert.match(appendSketchPoint([4, 1], 7).reason, /直线跨格/);
+  assert.match(appendSketchPoint([1], 8).reason, /long diagonal/);
+  assert.match(appendSketchPoint([4, 1], 7).reason, /long straight line/);
   assert.equal(appendSketchPoint([1], 8, { adjacentOnly: undefined }).changed, false, 'undefined keeps the legacy default exclusion');
   assert.equal(appendSketchPoint([1], 8, { adjacentOnly: undefined, excludeLongDiagonal: false }).changed, true, 'explicit individual fields still override the default');
   assert.throws(() => appendSketchPoint([1], 8, { excludeLongDiagonal: 'false' }), TypeError);

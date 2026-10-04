@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0c1726" />
-    <meta name="description" content="用记得的点和长度，筛选所有可能的 3×3 图案密码。所有计算都在本地完成。" />
-    <title>记忆线索 · Pattern Recall</title>
+    <meta data-i18n-content="intro" name="description" content="Start with the clues you remember. Let a familiar pattern emerge. Calculated on your device" />
+    <title>3 × 3 pattern memory helper · Pattern Recall</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./src/styles.css" />
     <link rel="stylesheet" href="./src/glass.css" />
@@ -13,88 +13,93 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="./" aria-label="记忆线索首页">
+      <a class="brand" href="./" aria-label="Pattern Recall">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 8h16L8 24h16"/><circle cx="8" cy="8" r="3"/><circle cx="24" cy="8" r="3"/><circle cx="8" cy="24" r="3"/><circle cx="24" cy="24" r="3"/></svg></span>
-        <span>记忆线索<span class="brand-en">PATTERN RECALL</span></span>
+        <span>Pattern Recall<span class="brand-en">3 × 3</span></span>
       </a>
-      <span class="header-description">3 × 3 图案密码回忆工具</span>
-      <span class="privacy-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6z"/><path d="m8 12 3 3 5-6"/></svg>仅在本地计算</span>
+      <span class="header-description"><span data-i18n="tagline">3 × 3 pattern memory helper</span></span>
+      <div class="header-controls">
+      <span class="privacy-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6z"/><path d="m8 12 3 3 5-6"/></svg><span data-i18n="privacy">Calculated on your device</span></span>
+      <label class="language-picker"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg><span class="sr-only" data-i18n="language">Language</span><select id="language" name="language" dir="ltr" aria-label="Language" data-i18n-aria-label="language"><option value="en">English</option></select></label>
+      </div>
     </header>
 
     <main class="workspace">
       <div class="intro">
-        <div><div class="eyebrow">A LITTLE MEMORY GOES A LONG WAY</div><h1>从记得的点，找回那条线<span>。</span></h1><p>留下你还记得的线索，让熟悉的图案浮现。</p></div>
-        <span class="intro-note"><span>01—09</span>每一个点，都可能是线索</span>
+        <div><div class="eyebrow"><span data-i18n="eyebrow">A little memory goes a long way</span></div><h1><span data-i18n="heading">Find the line you remember</span><span aria-hidden="true">.</span></h1><p><span data-i18n="intro">Start with the clues you remember. Let a familiar pattern emerge.</span></p></div>
+        <span class="intro-note"><span>01—09</span><span data-i18n="note">Every dot can be a clue</span></span>
       </div>
 
       <div class="workbench">
+        <div class="left-column">
         <aside class="clue-panel" aria-labelledby="clue-title">
-          <div class="panel-heading"><h2 id="clue-title">你的记忆线索</h2><button id="reset" class="text-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg>重置</button></div>
-          <details class="sketch-tool" id="sketch-tool">
-            <summary><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 12-12 4 4L8 20H4zm10-10 4 4"/></svg>试画九宫格</span><span class="sketch-fold" aria-hidden="true"></span></summary>
-            <div class="sketch-content">
-              <p class="field-hint">按住拖动画线，也可逐点点击。试着画出记忆中的方向。</p>
-              <div class="sketch-toolbar"><span>试着连一条熟悉的线</span><label class="number-toggle"><input id="sketch-show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>显示数字</label></div>
-              <div id="sketch-pad" class="sketch-pad" role="group" aria-label="九宫格试画区"><svg id="sketch-lines" viewBox="0 0 160 160" aria-hidden="true"></svg><div id="sketch-points"></div></div>
-              <div class="sketch-meta"><span>绘制顺序</span><span id="sketch-count">0 / 9 点</span></div>
-              <div id="sketch-sequence" class="sketch-sequence"></div>
-              <p id="sketch-status" class="sketch-status" role="status" aria-live="polite"></p>
-              <div class="sketch-actions"><button id="sketch-undo" class="secondary-button" type="button" disabled>撤回一点</button><button id="sketch-clear" class="secondary-button" type="button" disabled>清空试画</button></div>
-            </div>
-          </details>
+          <div class="panel-heading"><h2 id="clue-title"><span data-i18n="clues">Your memory clues</span></h2><button id="reset" class="text-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg><span data-i18n="reset">Reset</span></button></div>
           <form id="clue-form">
             <fieldset class="point-section">
-              <legend><span class="step-number">01</span>记得哪些点？</legend>
-              <div class="mode-switch" role="group" aria-label="点选模式">
-                <button type="button" data-mode="include" aria-pressed="true"><span class="mode-indicator include-indicator"></span>必须包含</button>
-                <button type="button" data-mode="exclude" aria-pressed="false"><span class="mode-indicator exclude-indicator"></span>一定排除</button>
-                <button type="button" data-mode="clear" aria-pressed="false">清除</button>
+              <legend><span class="step-number">01</span><span data-i18n="pointsQuestion">Which dots do you remember?</span></legend>
+              <div class="mode-switch" role="group" aria-label="Which dots do you remember?" data-i18n-aria-label="pointsQuestion">
+                <button type="button" data-mode="include" aria-pressed="true"><span class="mode-indicator include-indicator"></span><span data-i18n="include">Must include</span></button>
+                <button type="button" data-mode="exclude" aria-pressed="false"><span class="mode-indicator exclude-indicator"></span><span data-i18n="exclude">Must exclude</span></button>
+                <button type="button" data-mode="clear" aria-pressed="false"><span data-i18n="clear">Clear</span></button>
               </div>
-              <div class="input-grid" id="point-grid" role="group" aria-label="九宫格，点击设置点的条件"></div>
-              <div class="grid-legend"><span><i class="legend-dot included"></i>包含 <b id="included-count">0</b></span><span><i class="legend-dot excluded"></i>排除 <b id="excluded-count">0</b></span><span><i class="legend-dot neutral"></i>不确定 <b id="neutral-count">9</b></span></div>
-              <p class="field-hint">先选模式，再点击九宫格。再次点击可取消。</p>
+              <div class="input-grid" id="point-grid" role="group" aria-label="Dot clues: select dots to set conditions" data-i18n-aria-label="gridLabel"></div>
+              <div class="grid-legend"><span><i class="legend-dot included"></i><span data-i18n="included">Included</span> <b id="included-count">0</b></span><span><i class="legend-dot excluded"></i><span data-i18n="excluded">Excluded</span> <b id="excluded-count">0</b></span><span><i class="legend-dot neutral"></i><span data-i18n="unknown">Unknown</span> <b id="neutral-count">9</b></span></div>
+              <p class="field-hint"><span data-i18n="pointHint">Choose a mode, then select dots. Select a dot again to undo.</span></p>
             </fieldset>
             <div class="connection-option">
-              <div class="connection-rule"><label class="number-toggle"><input id="exclude-long-diagonal" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>排除斜线跨格</label><p class="field-hint">排除 1 → 8、1 → 9 等长斜线，允许 1 → 5。</p></div>
-              <div class="connection-rule"><label class="number-toggle"><input id="exclude-long-straight" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>排除直线跨格</label><p class="field-hint">排除 1 → 7、1 → 3 等长直线，允许 1 → 4。</p></div>
+              <div class="connection-rule"><label class="number-toggle"><input id="exclude-long-diagonal" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span><span data-i18n="excludeDiagonal">Exclude long diagonals</span></label><p class="field-hint"><span data-i18n="diagonalHint">Excludes 1 → 8 and 1 → 9; allows 1 → 5.</span></p></div>
+              <div class="connection-rule"><label class="number-toggle"><input id="exclude-long-straight" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span><span data-i18n="excludeStraight">Exclude long straight lines</span></label><p class="field-hint"><span data-i18n="straightHint">Excludes 1 → 7 and 1 → 3; allows 1 → 4.</span></p></div>
             </div>
             <fieldset class="length-section">
-              <legend><span class="step-number">02</span>大概连接了多少个点？</legend>
-              <div class="length-inputs"><label for="min-length"><span>最少</span><select id="min-length" name="minLength" aria-label="最少点数"></select></label><span class="range-divider">—</span><label for="max-length"><span>最多</span><select id="max-length" name="maxLength" aria-label="最多点数"></select></label></div>
+              <legend><span class="step-number">02</span><span data-i18n="lengthQuestion">How many dots were connected?</span></legend>
+              <div class="length-inputs"><label for="min-length"><span><span data-i18n="min">Minimum</span></span><select id="min-length" name="minLength" aria-label="Minimum" data-i18n-aria-label="min"></select></label><span class="range-divider">—</span><label for="max-length"><span><span data-i18n="max">Maximum</span></span><select id="max-length" name="maxLength" aria-label="Maximum" data-i18n-aria-label="max"></select></label></div>
               <div class="length-track" aria-hidden="true" id="length-track"></div>
-              <p class="field-hint">常见手机图案为 4–9 个点，可按记忆调整。</p>
+              <p class="field-hint"><span data-i18n="lengthHint">Phone patterns usually use 4–9 dots. Adjust to match your memory.</span></p>
             </fieldset>
             <fieldset class="endpoint-section">
-              <legend><span class="step-number">03</span>还记得起点和终点吗？</legend>
-              <div class="endpoint-inputs"><label for="start-point"><span>第一个点</span><select id="start-point" name="startPoint"><option value="0">不确定</option></select></label><label for="end-point"><span>最后一个点</span><select id="end-point" name="endPoint"><option value="0">不确定</option></select></label></div>
-              <p class="field-hint">选择后会自动包含该点；不确定时不限制。</p>
+              <legend><span class="step-number">03</span><span data-i18n="endpointsQuestion">Remember the start or end?</span></legend>
+              <div class="endpoint-inputs"><label for="start-point"><span><span data-i18n="first">First dot</span></span><select id="start-point" name="startPoint"><option value="0">Not sure</option></select></label><label for="end-point"><span><span data-i18n="last">Last dot</span></span><select id="end-point" name="endPoint"><option value="0">Not sure</option></select></label></div>
+              <p class="field-hint"><span data-i18n="endpointsHint">Selected endpoints are required. Leave them unknown for no restriction.</span></p>
             </fieldset>
-            <div id="constraint-summary" class="constraint-summary">暂无点位限制 · 4–9 个点</div>
+            <div id="constraint-summary" class="constraint-summary">No dot restrictions · 4–9 dots</div>
             <p class="form-error" id="form-error" role="alert" hidden></p>
-            <button class="generate-button" id="generate" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>列举可能的图案</span><kbd>↵</kbd></button>
+            <button class="generate-button" id="generate" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Find possible patterns</span><kbd>↵</kbd></button>
           </form>
-          <details class="rules"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>图案规则<span>＋</span></summary><div>每个点只能使用一次。斜线与直线的跨格排除可独立切换，默认均开启，只允许相邻横线、竖线及斜线。1 → 8 属于斜线跨格，1 → 7 属于直线跨格。允许跨格时仍遵循 Android 规则：连线跨过的中间点必须已经使用。包含的点不限定先后顺序，反向图案分别列举。</div></details>
+          <details class="rules"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg><span data-i18n="rules">Pattern rules</span><span>＋</span></summary><div data-i18n="rulesBody">Each dot can be used once. Long diagonal and straight moves can be excluded separately; both filters start enabled. Adjacent diagonals remain allowed. 1 → 8 is a long diagonal; 1 → 7 is a long straight line. When a long move crosses a dot, that dot must already be used. Required dots have no fixed order. Reverse sequences are listed separately.</div></details>
         </aside>
+          <details class="sketch-tool practice-panel" id="sketch-tool" open>
+            <summary><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 12-12 4 4L8 20H4zm10-10 4 4"/></svg><span data-i18n="sketchTitle">Practice drawing</span></span><span class="sketch-fold" aria-hidden="true"><span class="when-closed" data-i18n="expand">Expand</span><span class="when-open" data-i18n="collapse">Collapse</span></span></summary>
+            <div class="sketch-content">
+              <p class="field-hint"><span data-i18n="sketchHint">Drag or select dots one at a time. Try a direction that feels familiar.</span></p>
+              <div class="sketch-toolbar"><span><span data-i18n="sketchPrompt">Trace a familiar line</span></span><label class="number-toggle"><input id="sketch-show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span><span data-i18n="showNumbers">Show numbers</span></label></div>
+              <div id="sketch-pad" class="sketch-pad" role="group" aria-label="Practice drawing grid" data-i18n-aria-label="sketchLabel"><svg id="sketch-lines" viewBox="0 0 160 160" aria-hidden="true"></svg><div id="sketch-points"></div></div>
+              <div class="sketch-meta"><span><span data-i18n="drawingOrder">Drawing order</span></span><span id="sketch-count">0 / 9 dots</span></div>
+              <div id="sketch-sequence" class="sketch-sequence"></div>
+              <p id="sketch-status" class="sketch-status" role="status" aria-live="polite"></p>
+              <div class="sketch-actions"><button id="sketch-undo" class="secondary-button" type="button" disabled><span data-i18n="undo">Undo one dot</span></button><button id="sketch-clear" class="secondary-button" type="button" disabled><span data-i18n="clearSketch">Clear drawing</span></button></div>
+            </div>
+          </details>
+        </div>
 
         <section class="results-panel" aria-labelledby="results-title">
-          <div class="results-heading"><div><div class="eyebrow">POSSIBLE PATTERNS</div><h2 id="results-title">可能的图案 <span class="total-badge" id="total-count">—</span><span class="remaining-badge" title="当前点数筛选下，未被排除的图案数量" aria-live="polite" aria-atomic="true">剩余 <span id="remaining-count">—</span></span></h2></div><button type="button" id="export" class="secondary-button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg>导出全部</button></div>
-          <div class="result-summary"><span id="result-description">根据你的线索，逐个看看是否熟悉。</span><span class="result-time" id="result-time"></span></div>
-          <div class="results-toolbar"><div id="length-filters" class="length-filters" role="group" aria-label="按点数查看候选"></div><label class="number-toggle"><input id="show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span>显示点号</label></div>
-          <div class="review-toolbar"><label class="number-toggle"><input id="hide-dismissed" type="checkbox"/><span class="switch-ui" aria-hidden="true"></span>隐藏已排除</label><span class="dismissed-summary" id="dismissed-summary">已排除 0 个</span><button id="restore-all" class="text-button" type="button" disabled>恢复全部</button></div>
+          <div class="results-heading"><div><div class="eyebrow"><span data-i18n="resultsEyebrow">Explore the possibilities</span></div><h2 id="results-title"><span data-i18n="results">Possible patterns</span> <span class="total-badge" id="total-count">—</span><span class="remaining-badge" title="Undismissed patterns within the current length filter" data-i18n-title="remainingHint" aria-live="polite" aria-atomic="true"><span data-i18n="remaining">Remaining</span> <span id="remaining-count">—</span></span></h2></div><button type="button" id="export" class="secondary-button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg><span data-i18n="export">Export all</span></button></div>
+          <div class="result-summary"><span id="result-description"></span><span class="result-time" id="result-time"></span></div>
+          <div class="results-toolbar"><div id="length-filters" class="length-filters" role="group" aria-label="Filter by number of dots" data-i18n-aria-label="filtersLabel"></div><label class="number-toggle"><input id="show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span><span data-i18n="showNumbers">Show numbers</span></label></div>
+          <div class="review-toolbar"><label class="number-toggle"><input id="hide-dismissed" type="checkbox"/><span class="switch-ui" aria-hidden="true"></span><span data-i18n="hideDismissed">Hide excluded</span></label><span class="dismissed-summary" id="dismissed-summary">0 excluded</span><button id="restore-all" class="text-button" type="button" disabled><span data-i18n="restoreAll">Restore all</span></button></div>
           <div id="result-status" class="result-status" role="status" aria-live="polite"></div>
           <div class="pattern-grid" id="pattern-grid"></div>
-          <div id="empty-state" class="empty-state" hidden><svg viewBox="0 0 90 90" aria-hidden="true"><path d="m23 23 44 44M67 23 23 67"/><circle cx="23" cy="23" r="5"/><circle cx="67" cy="23" r="5"/><circle cx="23" cy="67" r="5"/><circle cx="67" cy="67" r="5"/><circle cx="45" cy="45" r="5"/></svg><h3 id="empty-title">这些线索暂时没有交集</h3><p id="empty-description">试试减少必含点、取消部分排除点，或扩大点数范围。</p><button type="button" id="empty-reset" class="secondary-button">重置线索</button></div>
-          <nav class="pagination" id="pagination" aria-label="候选图案分页"><span id="page-description"></span><div class="page-controls"><button id="prev-page" class="page-button" type="button" aria-label="上一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button><label class="page-jump"><input id="page-input" type="number" min="1" value="1" aria-label="跳转页码"/><span id="page-total">/ 1</span></label><button id="next-page" class="page-button" type="button" aria-label="下一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button></div></nav>
-          <div class="results-footnote"><span class="start-key"></span>绿色圆点为起点，线上的箭头表示连接方向。点击图案查看绘制顺序。</div>
+          <div id="empty-state" class="empty-state" hidden><svg viewBox="0 0 90 90" aria-hidden="true"><path d="m23 23 44 44M67 23 23 67"/><circle cx="23" cy="23" r="5"/><circle cx="67" cy="23" r="5"/><circle cx="23" cy="67" r="5"/><circle cx="67" cy="67" r="5"/><circle cx="45" cy="45" r="5"/></svg><h3 id="empty-title"><span data-i18n="emptyTitle">No patterns match these clues</span></h3><p id="empty-description"><span data-i18n="emptyHelp">Try fewer required dots, fewer exclusions, or a wider length range.</span></p><button type="button" id="empty-reset" class="secondary-button"><span data-i18n="reset">Reset</span></button></div>
+          <nav class="pagination" id="pagination" aria-label="Pattern pages" data-i18n-aria-label="pagination"><span id="page-description"></span><div class="page-controls"><button id="prev-page" class="page-button" type="button" aria-label="Previous page" data-i18n-aria-label="prev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button><label class="page-jump"><input id="page-input" type="number" min="1" value="1" aria-label="Go to page" data-i18n-aria-label="jump"/><span id="page-total">/ 1</span></label><button id="next-page" class="page-button" type="button" aria-label="Next page" data-i18n-aria-label="next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button></div></nav>
+          <div class="results-footnote"><span class="start-key"></span><span data-i18n="footnote">Green marks the start; arrows show the direction. Select a pattern to see the drawing order.</span></div>
         </section>
       </div>
     </main>
-    <footer class="site-footer"><span>少一点猜测，多一点线索。</span><span>所有线索和图案留在此页面，刷新后清空。</span></footer>
+    <footer class="site-footer"><span><span data-i18n="footer">Less guessing. More clues.</span></span><span><span data-i18n="footerPrivacy">Clues and patterns clear on reload. Only your language preference is saved.</span></span></footer>
 
     <dialog id="pattern-dialog" class="pattern-dialog" aria-labelledby="dialog-title">
-      <div class="dialog-heading"><div><div class="eyebrow">TAKE A CLOSER LOOK</div><h2 id="dialog-title">看看这条线</h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="关闭图案详情"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <div class="dialog-heading"><div><div class="eyebrow"><span data-i18n="detailEyebrow">Take a closer look</span></div><h2 id="dialog-title">Follow this line</h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close details" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       <div id="detail-pattern" class="detail-pattern"></div><div id="detail-sequence" class="detail-sequence"></div><p class="detail-caption" id="detail-caption"></p>
-      <div class="dialog-actions"><button id="replay-pattern" class="secondary-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg>重播连线</button><button id="copy-pattern" class="generate-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h12v12H8zM4 16V4h12"/></svg>复制点序列</button></div>
+      <div class="dialog-actions"><button id="replay-pattern" class="secondary-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg><span data-i18n="replay">Replay</span></button><button id="copy-pattern" class="generate-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h12v12H8zM4 16V4h12"/></svg><span data-i18n="copy">Copy sequence</span></button></div>
     </dialog>
     <div id="toast" class="toast" role="status" hidden></div>
   </body>

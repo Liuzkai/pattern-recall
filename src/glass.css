@@ -32,6 +32,7 @@ button, select, input { border-radius: 11px; }
 
 .site-header,
 .clue-panel,
+.practice-panel,
 .results-panel,
 .pattern-dialog,
 .toast {
@@ -301,7 +302,79 @@ select option { background: #203047; color: var(--text); }
 #sketch-points.is-dot-mode .sketch-point.is-start:before { background: var(--lime); border-color: #e3ffc5; box-shadow: 0 0 0 5px rgba(197, 247, 120, .09), 0 0 18px rgba(197, 247, 120, .25); }
 #sketch-points.is-dot-mode .sketch-point.is-end:before { background: #26354b; border: 2px solid var(--purple); box-shadow: 0 0 0 4px rgba(201, 184, 255, .07); }
 
+/* The practice pad is a separate card below the clue form. */
+.workbench { direction: ltr; }
+.left-column { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.sketch-tool.practice-panel {
+  margin: 0;
+  background: linear-gradient(145deg, var(--glass-highlight), rgba(222, 237, 255, .018)), var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow);
+}
+.practice-panel summary { padding: 22px; gap: 12px; }
+.practice-panel .sketch-content { padding: 0 22px 22px; }
+.sketch-fold { font-size: 12px; font-weight: 400; color: var(--muted); }
+.sketch-fold:before, .sketch-tool[open] .sketch-fold:before { content: none; }
+.sketch-tool .when-open, .sketch-tool[open] .when-closed { display: none; }
+.sketch-tool[open] .when-open { display: inline; }
+
+/* Let translated labels wrap without squeezing the controls or the pattern grid. */
+.site-header { height: auto; min-height: 91px; padding-block: 18px; flex-wrap: wrap; gap: 24px; }
+.brand { flex-shrink: 0; direction: ltr; }
+.header-controls { display: flex; align-items: center; gap: 22px; margin-inline-start: auto; min-width: 0; }
+.privacy-badge { margin: 0; }
+.language-picker { position: relative; display: flex; align-items: center; min-width: 0; }
+.language-picker > svg { position: absolute; left: 12px; width: 17px; height: 17px; fill: none; stroke: var(--muted); stroke-width: 1.5; pointer-events: none; }
+.language-picker select { width: 178px; max-width: 100%; padding: 0 32px 0 38px; font-size: 13px; background-position: right 10px center; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.intro h1 > [data-i18n] { color: inherit; text-shadow: none; }
+.intro-note > [data-i18n] { font: inherit; letter-spacing: normal; color: inherit; }
+.intro > div { min-width: 0; }
+.intro-note { flex-shrink: 0; max-width: 180px; }
+.eyebrow { text-transform: uppercase; }
+.panel-heading { align-items: flex-start; gap: 12px; }
+.panel-heading h2 { min-width: 0; }
+.panel-heading .text-button { flex-shrink: 0; }
+.mode-switch button { height: auto; min-height: 42px; padding: 8px 4px; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
+.mode-indicator, .switch-ui, button svg, summary svg, .privacy-badge svg { flex-shrink: 0; }
+.grid-legend { flex-wrap: wrap; column-gap: 12px; row-gap: 6px; }
+.number-toggle { white-space: normal; }
+.length-inputs { gap: 10px; }
+.length-inputs select, .endpoint-inputs select { padding-inline: 10px 28px; background-position: right 8px center; min-width: 0; font-size: 13px; }
+.endpoint-inputs label, .length-inputs label { display: flex; flex-direction: column; justify-content: flex-end; }
+.rules summary > [data-i18n] { margin: 0; font-size: inherit; }
+.rules summary > span:last-child { margin-left: 0; margin-inline-start: auto; }
+.results-toolbar { flex-wrap: wrap; }
+.results-heading { align-items: flex-start; }
+.results-heading > button { flex-shrink: 0; max-width: 150px; }
+.length-filters { flex-wrap: wrap; }
+.length-filter { white-space: nowrap; }
+.secondary-button, .generate-button, .pattern-dismiss { white-space: normal; overflow-wrap: anywhere; }
+.pattern-dismiss { flex: 1; }
+.pattern-card { display: flex; flex-direction: column; }
+.card-top { gap: 8px; }
+.card-length { text-align: end; }
+.sketch-actions > button { min-width: 0; }
+.sketch-meta { flex-wrap: wrap; gap: 8px; }
+.site-footer { gap: 16px; }
+.site-footer > span { max-width: 65%; }
+
+/* Language direction never changes physical dot positions or drawing order. */
+.input-grid, .sketch-pad, .pattern-svg, .pattern-sequence, .detail-sequence,
+.sketch-sequence, .length-track, .page-jump, .card-id, .total-badge, #remaining-count { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .left-column, [dir="rtl"] .results-panel { direction: rtl; }
+[dir="rtl"] .header-description { border-left: 0; border-right: 1px solid var(--border); padding-left: 0; padding-right: 30px; }
+[dir="rtl"] .step-number { margin-right: 0; margin-left: 11px; }
+[dir="rtl"] .number-toggle input { left: auto; right: 0; }
+[dir="rtl"] .length-inputs select, [dir="rtl"] .endpoint-inputs select { background-position: left 8px center; }
+[dir="rtl"] .page-button svg { transform: scaleX(-1); }
+[dir="rtl"] .intro-note { text-align: left; }
+[dir="rtl"] .eyebrow { letter-spacing: normal; }
+[dir="rtl"] .review-toolbar .text-button { margin-left: 0; margin-right: auto; }
+
 @media (max-width: 1150px) {
+  .header-description { display: none; }
   .intro h1 { font-size: 28px; }
   .results-panel { padding: 20px; }
 }
@@ -310,6 +383,17 @@ select option { background: #203047; color: var(--text); }
   .results-heading { flex-wrap: wrap; }
 }
 @media (max-width: 640px) {
+  .site-header { min-height: 0; padding: 16px 20px; gap: 14px; }
+  .header-controls { width: 100%; justify-content: space-between; gap: 12px; }
+  .privacy-badge { font-size: 11px; min-width: 0; }
+  .language-picker { flex-shrink: 0; }
+  .language-picker select { width: 157px; }
+  .left-column { margin-bottom: 26px; gap: 18px; }
+  .left-column .clue-panel { margin-bottom: 0; }
+  .sketch-tool.practice-panel { border-radius: 22px; }
+  .practice-panel .sketch-pad { max-width: 340px; margin-inline: auto; }
+  .site-footer { flex-direction: column; }
+  .site-footer > span { max-width: none; }
   .intro h1 { font-size: 24px; }
   .clue-panel { border-radius: 22px; }
   .results-panel { padding: 20px 16px; border-radius: 22px; }
@@ -323,10 +407,10 @@ select option { background: #203047; color: var(--text); }
 
 /* Keep content readable when blur is unavailable or transparency is unwanted. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .site-header, .clue-panel, .results-panel, .pattern-dialog { background: #203047; }
+  .site-header, .clue-panel, .sketch-tool.practice-panel, .results-panel, .pattern-dialog { background: #203047; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .site-header, .clue-panel, .results-panel, .pattern-dialog { background: #203047; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .site-header, .clue-panel, .sketch-tool.practice-panel, .results-panel, .pattern-dialog { background: #203047; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .toast { background: #dcffbf; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .pattern-dialog::backdrop { background: rgba(4, 12, 25, .85); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }

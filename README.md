@@ -14,6 +14,7 @@ A tool for recalling 3×3 Android unlock patterns from the clues you remember. S
 - Browse candidates, dismiss individual patterns, hide dismissed results, and track the remaining count.
 - Inspect drawing order, replay patterns, copy their sequences, and export candidates as CSV.
 - Use a responsive Glassmorphism interface with no backend or runtime dependencies.
+- Switch between 14 interface languages, with English as the first-visit default and support for right-to-left text.
 
 ## Local development
 
@@ -39,17 +40,19 @@ GitHub Pages publishes the root of the `main` branch. Pushing to `main` automati
 
 ## Usage
 
-The app interface is currently in Simplified Chinese. The instructions below include the corresponding on-screen labels. The Glassmorphism design uses soft background glows, translucent panels, and frosted surfaces.
+The interface defaults to English. Use the language selector in the header to choose English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, Spanish, Hindi, Arabic, Bengali, Portuguese, Russian, Urdu, or Indonesian. Your language preference is saved locally; switching languages preserves clues, exclusions, pagination, and the practice drawing. Arabic and Urdu use right-to-left text, while the physical dot layout and sequence direction remain unchanged.
 
-Expand **Practice drawing** (`试画九宫格`) in the left panel. Drag with a mouse or finger, click dots individually, or use Tab followed by Enter/Space. Turn off **Show numbers** (`显示数字`) to draw with plain dots. This preserves your drawing and is independent of the number toggle for candidate patterns. Green marks the start, purple marks the end, and the sequence appears below. Use **Undo one dot** (`撤回一点`) or **Clear drawing** (`清空试画`) to try again.
+Labels, validation messages, pattern details, accessibility labels, and CSV column headers follow the selected language. An export keeps the language selected when it started. The Glassmorphism design uses soft background glows, translucent panels, and frosted surfaces.
+
+**Practice drawing** (`试画九宫格`) is a separate card at the bottom of the left column, below the clue panel. It opens by default and can be collapsed. Drag with a mouse or finger, click dots individually, or use Tab followed by Enter/Space. Turn off **Show numbers** (`显示数字`) to draw with plain dots. This preserves your drawing and is independent of the number toggle for candidate patterns. Green marks the start, purple marks the end, and the sequence appears below. Use **Undo one dot** (`撤回一点`) or **Clear drawing** (`清空试画`) to try again.
 
 The practice pad follows the two independent crossing filters. When a type of long move is allowed, drawing follows Android's automatic midpoint insertion. Dots crossed during a fast drag are added in order. Changing the rules preserves your drawing and shows a warning if it contains a connection that is now excluded.
 
 1. Choose **Must include** (`必须包含`) or **Must exclude** (`一定排除`), then click dots in the clue grid. Click a selected dot again to cancel it. **Clear** (`清除`) returns a dot to an unknown state.
-2. **Exclude long diagonals** (`排除斜线跨格`) and **Exclude long straight moves** (`排除直线跨格`) are both enabled by default and can be changed independently. Long diagonals include `1→8`, `1→6`, and `1→9`; long straight moves include `1→7` and `1→3`. Adjacent diagonals such as `1→5` remain allowed. Disable both filters to use the standard Android rules. Click **List possible patterns** (`列举可能的图案`) after changing clues or rules.
+2. **Exclude long diagonals** (`排除斜线跨格`) and **Exclude long straight lines** (`排除直线跨格`) are both enabled by default and can be changed independently. Long diagonals include `1→8`, `1→6`, and `1→9`; long straight moves include `1→7` and `1→3`. Adjacent diagonals such as `1→5` remain allowed. Disable both filters to use the standard Android rules. Click **Find possible patterns** (`列举可能的图案`) after changing clues or rules.
 3. Set the minimum and maximum number of dots. The default is 4–9; the supported range is 1–9. Changing one bound past the other updates both bounds to keep the range valid.
 4. Optionally select the first and last dots. **Not sure** (`不确定`) leaves an endpoint unrestricted. A chosen endpoint is automatically required; a conflict with an excluded dot prompts you to adjust the clues.
-5. Click **List possible patterns** (`列举可能的图案`). Results show 24 patterns per page. Filter by length, move between pages, or enter a page number directly.
+5. Click **Find possible patterns** (`列举可能的图案`). Results show 24 patterns per page. Filter by length, move between pages, or enter a page number directly.
 6. Click a pattern to inspect its direction, full sequence, and animated replay. You can also copy the sequence.
 7. Each card has a separate **Exclude this pattern** (`排除此图案`) button. Excluded cards dim, and the button changes to **Excluded · Restore** (`已排除 · 恢复`). Excluding a card does not open its details.
 8. Enable **Hide excluded** (`隐藏已排除`) to remove dismissed patterns from the list, total count, and pagination. Disable it to restore individual patterns, or choose **Restore all** (`恢复全部`). The **Remaining** (`剩余`) badge always counts undismissed patterns within the selected length filter, whether dismissed cards are visible or hidden.
@@ -120,13 +123,15 @@ src/worker.js          Background computation and result transfer
 src/render.js          SVG patterns and direction arrows
 src/sketch.js          Practice sequences, gesture hit detection, drawing controls
 src/styles.css         Responsive layout and base styles
-src/glass.css          Glass theme and practice dot appearance
+src/glass.css          Glass theme, practice card, responsive and RTL layout
+src/i18n.js            Language selection, formatting, and text updates
+src/locales/           Complete message catalogs for 14 interface languages
 scripts/serve.mjs      Static development server with no dependencies
 scripts/build.mjs      Static asset build
 .nojekyll              GitHub Pages static publishing marker
 tests/                 Algorithm and interaction checks
 ```
 
-Enumeration uses depth-first search with bitmask pruning. Results are stored in a `Uint32Array` and transferred from a Worker. Only one page is rendered at a time. CSV exports are generated in chunks to avoid blocking interaction. Clues and patterns are processed locally, are not uploaded, and are not persisted between page reloads.
+Enumeration uses depth-first search with bitmask pruning. Results are stored in a `Uint32Array` and transferred from a Worker. Only one page is rendered at a time. CSV exports are generated in chunks to avoid blocking interaction. Clues and patterns are processed locally, are not uploaded, and are not persisted between page reloads. Only the language preference is saved in local storage; the app still works when storage is unavailable.
 
 In browsers that support WebMCP, the page optionally registers an `enumerate_pattern_candidates` tool using the same state and actions as the interface. `excludeLongDiagonal` and `excludeLongStraight` control the two crossing exclusions independently. The legacy `adjacentOnly` option defaults to `true` and provides a shared default for both filters; explicit individual options take precedence. Browsers without WebMCP can use the app normally.

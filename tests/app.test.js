@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setImmediate as immediate } from 'node:timers/promises';
 import { Worker as NodeWorker } from 'node:worker_threads';
+import { languages, t, formatNumber } from '../src/i18n.js';
 
 // An offline DOM harness tests state transitions without launching a browser.
 class Element {
@@ -30,6 +31,7 @@ class Element {
     for (const handler of this.listeners.get(event) || []) await handler({ target: this, preventDefault() {}, ...data });
   }
   setAttribute(key, value) { this.attributes.set(key, value); }
+  getAttribute(key) { return this.attributes.get(key); }
   removeAttribute(key) { this.attributes.delete(key); }
   insertAdjacentHTML(_, content) { this.innerHTML += content; }
   focus() { focused = this.selector; }
@@ -56,9 +58,10 @@ const registered = [];
 const downloads = [];
 const blobUrls = new Map();
 const workerURL = new URL('../src/worker.js', import.meta.url).href;
-let failNextWorker = false;
+let failNextWorker = false, workerCount = 0;
 class BrowserWorker {
   constructor() {
+    workerCount++;
     this.worker = new NodeWorker(`
       const { parentPort } = require('node:worker_threads');
       global.self = { postMessage: (data, transfer) => parentPort.postMessage(data, transfer) };
@@ -106,7 +109,7 @@ async function selectPoint(point) {
 test('offline UI journey exercises real Worker, filters, ranges, details, export, failures, and optional tool', async () => {
   const saved = {
     document: globalThis.document, window: globalThis.window, Worker: globalThis.Worker,
-    createObjectURL: URL.createObjectURL, revokeObjectURL: URL.revokeObjectURL,
+    createObjectURL: URL.createObjectURL, revokeObjectURL: URL.revokeObjectURL, localStorage: globalThis.localStorage,
   };
   const timers = new Set();
   const nativeSetTimeout = globalThis.setTimeout;
@@ -116,7 +119,8 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     return timer;
   };
   globalThis.document = {
-    querySelector: element, querySelectorAll: () => modeButtons,
+    documentElement: element('html'),
+    querySelector: element, querySelectorAll: selector => selector === '[data-mode]' ? modeButtons : [],
     createElement: () => {
       const link = new Element('download');
       link.click = () => downloads.push({ filename: link.download, blob: blobUrls.get(link.href) });
@@ -124,7 +128,10 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     },
     modelContext: { registerTool: tool => registered.push(tool) },
   };
+  const preferences = new Map();
+  globalThis.localStorage = { getItem: key => preferences.get(key), setItem: (key, value) => preferences.set(key, value) };
   globalThis.window = { addEventListener() {} };
+  const changeLanguage = async locale => { element('#language').value = locale; await element('#language').dispatch('change'); };
   globalThis.Worker = BrowserWorker;
   URL.createObjectURL = blob => { const id = `blob:test-${blobUrls.size}`; blobUrls.set(id, blob); return id; };
   URL.revokeObjectURL = id => blobUrls.delete(id);
@@ -132,6 +139,11 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
   try {
     await import('../src/app.js');
     await settle(() => element('#total-count').textContent === '10,096', 'default adjacent enumeration');
+    assert.equal(element('#language').value, 'en', 'first visit defaults to English');
+    assert.equal(document.documentElement.lang, 'en');
+    assert.equal(element('#generate span').textContent, 'Find possible patterns');
+    assert.equal(preferences.size, 0, 'nothing is persisted on first load');
+    await changeLanguage('zh-CN');
     assert.equal(element('#exclude-long-diagonal').checked, true);
     assert.equal(element('#exclude-long-straight').checked, true);
     assert.equal(element('#remaining-count').textContent, '10,096');
@@ -224,18 +236,18 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.deepEqual(sketchPoints(), [2, 1, 3]);
     await setConnectionRules(false, true);
     assert.deepEqual(sketchPoints(), [2, 1, 3], 'rule changes preserve the drawing');
-    assert.match(element('#sketch-status').textContent, /已有连线包含跨格连接/);
+    assert.match(element('#sketch-status').textContent, /已有连线包含被当前规则排除/);
     await setConnectionRules(true, false);
-    assert.doesNotMatch(element('#sketch-status').textContent, /已有连线包含跨格连接/, 'straight drawing is unaffected by diagonal exclusion');
+    assert.doesNotMatch(element('#sketch-status').textContent, /已有连线包含被当前规则排除/, 'straight drawing is unaffected by diagonal exclusion');
     await setConnectionRules(false, false);
     await element('#sketch-clear').dispatch('click');
     await sketchClick(1);
     await sketchClick(8);
     assert.deepEqual(sketchPoints(), [1, 8]);
     await setConnectionRules(false, true);
-    assert.doesNotMatch(element('#sketch-status').textContent, /已有连线包含跨格连接/, 'diagonal drawing is unaffected by straight exclusion');
+    assert.doesNotMatch(element('#sketch-status').textContent, /已有连线包含被当前规则排除/, 'diagonal drawing is unaffected by straight exclusion');
     await setConnectionRules(true, false);
-    assert.match(element('#sketch-status').textContent, /已有连线包含跨格连接/);
+    assert.match(element('#sketch-status').textContent, /已有连线包含被当前规则排除/);
     await setConnectionRules(false, false);
     await element('#sketch-clear').dispatch('click');
     assert.equal(element('#remaining-count').textContent, '389,112');
@@ -271,16 +283,21 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await element('#close-dialog').dispatch('click');
     assert.equal(element('#pattern-dialog').open, false);
 
+    await changeLanguage('fr');
     await element('#export').dispatch('click');
+    await changeLanguage('ja');
     element('#show-numbers').checked = false;
     await element('#show-numbers').dispatch('change');
     assert.equal(element('#export').disabled, true, 'rendering must not re-enable an active export');
     await element('#export').dispatch('click');
     await settle(() => downloads.length === 1 && !element('#export').disabled, 'complete export');
     const csv = await downloads[0].blob.text();
+    assert.ok(csv.startsWith('"Numéro","Points","Séquence"'), 'CSV headers keep the language captured at export start');
+    assert.match(downloads[0].filename, /pattern-recall_fr_/);
     assert.equal(csv.trim().split('\r\n').length, 7779, 'export includes every length, regardless of display filter');
-    assert.match(downloads[0].filename, /包含15_排除9/);
+    assert.match(downloads[0].filename, /include-15_exclude-9/);
     assert.doesNotMatch(element('#pattern-grid').innerHTML, /<text /);
+    await changeLanguage('zh-CN');
 
     const before = element('#constraint-summary').textContent;
     await assert.rejects(() => runQuery({ included: [1], excluded: [1], minLength: 4, maxLength: 6 }), /同时必含和排除/);
@@ -297,7 +314,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
 
     failNextWorker = true;
     await element('#reset').dispatch('click');
-    await settle(() => element('#result-status').textContent.includes('无法启动'), 'worker failure');
+    await settle(() => element('#result-status').textContent.includes('未能启动'), 'worker failure');
     assert.equal(element('#exclude-long-diagonal').checked, true);
     assert.equal(element('#exclude-long-straight').checked, true);
     await setConnectionRules(false, false);
@@ -347,7 +364,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     const filteredCsv = await downloads[1].blob.text();
     assert.equal(filteredCsv.trim().split('\r\n').length, 462, 'snapshot retains the 461 candidates at export start');
     assert.ok(!filteredCsv.includes(`,${dismissed}\r\n`));
-    assert.match(downloads[1].filename, /起点1_终点9_已过滤排除图案/);
+    assert.match(downloads[1].filename, /start-1_end-9_undismissed/);
     assert.equal(element('#total-count').textContent, '462');
     assert.equal(element('#remaining-count').textContent, '462', 'restoring all updates remaining');
     await element('#length-filters').dispatch('click', { target: target({ length: '5' }) });
@@ -355,6 +372,44 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     const fivePointCode = element('#pattern-grid').innerHTML.match(/data-pattern="(\d+)"/)[1];
     await element('#pattern-grid').dispatch('click', { target: target({ dismiss: fivePointCode }) });
     assert.equal(element('#remaining-count').textContent, '91');
+    // Language switches preserve the entire working session, including unapplied clues.
+    await element('#next-page').dispatch('click');
+    await sketchClick(1);
+    await sketchClick(8);
+    await element('.mode-switch').dispatch('click', { target: target({ mode: 'exclude' }) });
+    await selectPoint(2);
+    await sketchClick(1); // Keep a visible warning to verify that it is translated too.
+    const workersBeforeSwitch = workerCount;
+    const codes = () => [...element('#pattern-grid').innerHTML.matchAll(/data-pattern="(\d+)"/g)].map(match => match[1]);
+    const beforeSwitch = codes();
+    const practiceBeforeSwitch = element('#sketch-lines').innerHTML;
+    const selectedPage = element('#page-input').value;
+    for (const { code: locale } of languages) {
+      await changeLanguage(locale);
+      assert.equal(document.documentElement.lang, locale);
+      assert.deepEqual(codes(), beforeSwitch, `${locale}: candidate sequences and page remain unchanged`);
+      assert.equal(element('#remaining-count').textContent, formatNumber(91, locale));
+      assert.equal(element('#total-count').textContent, formatNumber(462, locale));
+      assert.equal(element('#page-input').value, selectedPage);
+      assert.equal(element('#sketch-lines').innerHTML, practiceBeforeSwitch);
+      assert.deepEqual(sketchPoints(), [1, 8]);
+      assert.equal(element('#sketch-status').textContent, t('sketchRepeat', { point: 1 }));
+      assert.equal(element('#result-status').textContent, t('dirty'));
+      assert.equal(element('#excluded-count').textContent, 1);
+      assert.equal(element('#start-point').value, 1);
+      assert.equal(element('#end-point').value, 9);
+      assert.equal(element('#export').disabled, true, 'pending clue changes remain pending');
+      assert.match(element('#length-filters').innerHTML, /data-length="5" aria-pressed="true"/);
+      assert.equal(element('#dismissed-summary').textContent, t('dismissedCount', { count: 1 }));
+      await element('#pattern-grid').dispatch('click', { target: target({ pattern: beforeSwitch[0] }) });
+      assert.equal(element('#dialog-title').textContent, t('detailPoints', { count: 5 }));
+      await element('#close-dialog').dispatch('click');
+    }
+    assert.equal(workerCount, workersBeforeSwitch, 'switching languages must not regenerate patterns');
+    assert.deepEqual([...preferences.keys()], ['pattern-recall.language'], 'patterns and clues never enter local storage');
+    await changeLanguage('zh-CN');
+    await element('#sketch-clear').dispatch('click');
+    await selectPoint(2);
     element('#hide-dismissed').checked = true;
     await element('#hide-dismissed').dispatch('change');
     assert.equal(element('#remaining-count').textContent, '91');
@@ -384,7 +439,7 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(element('#total-count').textContent, '0');
     assert.equal(element('#remaining-count').textContent, '0');
     assert.equal(element('#export').disabled, true);
-    assert.match(element('#empty-title').textContent, /都已被排除/);
+    assert.match(element('#empty-title').textContent, /都已排除/);
     await element('#empty-reset').dispatch('click');
     assert.equal(element('#total-count').textContent, '1');
     assert.equal(element('#empty-state').hidden, true);
@@ -432,6 +487,8 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     globalThis.document = saved.document;
     globalThis.window = saved.window;
     globalThis.Worker = saved.Worker;
+    if (saved.localStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = saved.localStorage;
     URL.createObjectURL = saved.createObjectURL;
     URL.revokeObjectURL = saved.revokeObjectURL;
   }

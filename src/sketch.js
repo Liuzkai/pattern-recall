@@ -1,5 +1,6 @@
 import { position, sequenceMarkup } from './render.js';
 import { connectionAllowed, connectionType, resolveConnectionRules } from './connections.js';
+import { t, html } from './i18n.js';
 
 function validatePoint(point) {
   if (!Number.isInteger(point) || point < 1 || point > 9) throw new RangeError('试画点号必须是 1–9 的整数');
@@ -12,15 +13,16 @@ export function appendSketchPoint(sequence, next, options = {}) {
   if (new Set(sequence).size !== sequence.length) throw new RangeError('试画序列不能包含重复点');
   const rules = resolveConnectionRules({ ...options, adjacentOnly: options.adjacentOnly === undefined ? true : options.adjacentOnly });
   const points = sequence.slice();
-  if (points.includes(next)) return { points, added: [], changed: false, reason: `点 ${next} 已经使用过了` };
+  if (points.includes(next)) return { points, added: [], changed: false, reason: t('sketchRepeat', { point: next }), reasonKey: 'sketchRepeat', reasonValues: { point: next } };
   const added = [];
   if (points.length) {
     const last = points.at(-1);
     const rowA = Math.floor((last - 1) / 3), colA = (last - 1) % 3;
     const rowB = Math.floor((next - 1) / 3), colB = (next - 1) % 3;
     if (!connectionAllowed(last, next, rules)) {
-      const label = connectionType(last, next) === 'diagonal' ? '斜线' : '直线';
-      return { points, added, changed: false, reason: `${last} → ${next} 属于${label}跨格，当前已排除` };
+      const reasonKey = connectionType(last, next) === 'diagonal' ? 'sketchBlockedDiagonal' : 'sketchBlockedStraight';
+      const reasonValues = { from: last, to: next };
+      return { points, added, changed: false, reason: t(reasonKey, reasonValues), reasonKey, reasonValues };
     }
     const middleRow = (rowA + rowB) / 2, middleCol = (colA + colB) / 2;
     if (Number.isInteger(middleRow) && Number.isInteger(middleCol)) {
@@ -60,11 +62,11 @@ export function createSketchTool({ getConnectionRules }) {
   const $ = selector => document.querySelector(selector);
   const pad = $('#sketch-pad');
   const numberToggle = $('#sketch-show-numbers');
-  let points = [], pointerId = null, previous = null, guide = null, reason = '';
+  let points = [], pointerId = null, previous = null, guide = null, reason = null;
   $('#sketch-points').innerHTML = Array.from({ length: 9 }, (_, i) => {
     const point = i + 1;
     const [x, y] = position(point);
-    return `<button class="sketch-point" type="button" data-sketch-point="${point}" style="left:${x / 1.6}%;top:${y / 1.6}%" aria-label="试画点 ${point}" aria-pressed="false">${point}</button>`;
+    return `<button class="sketch-point" type="button" data-sketch-point="${point}" style="left:${x / 1.6}%;top:${y / 1.6}%" aria-label="${html(t('sketchDot', { point }))}" aria-pressed="false">${point}</button>`;
   }).join('');
 
   function render() {
@@ -80,23 +82,23 @@ export function createSketchTool({ getConnectionRules }) {
       button.classList.toggle('is-start', order === 0);
       button.classList.toggle('is-end', order > 0 && order === points.length - 1);
       button.setAttribute('aria-pressed', String(order !== -1));
-      button.setAttribute('aria-label', `试画点 ${point}${order === -1 ? '' : `，第 ${order + 1} 个点`}`);
+      button.setAttribute('aria-label', t(order === -1 ? 'sketchDot' : 'sketchDotOrder', { point, order: order + 1 }));
     }
-    $('#sketch-sequence').innerHTML = points.length ? sequenceMarkup(points.join(''), true) : '<span class="sketch-placeholder">点序列会显示在这里</span>';
-    $('#sketch-count').textContent = `${points.length} / 9 点`;
+    $('#sketch-sequence').innerHTML = points.length ? sequenceMarkup(points.join(''), true) : `<span class="sketch-placeholder">${html(t('sketchEmpty'))}</span>`;
+    $('#sketch-count').textContent = t('dotCount', { count: `${points.length} / 9` });
     $('#sketch-undo').disabled = !points.length;
     $('#sketch-clear').disabled = !points.length;
     const rules = getConnectionRules();
     const conflict = !sketchMatchesRule(points, rules);
-    const hint = rules.excludeLongDiagonal && rules.excludeLongStraight ? '仅连接相邻点，允许相邻斜线' : rules.excludeLongDiagonal ? '排除斜线跨格，允许直线跨格' : rules.excludeLongStraight ? '排除直线跨格，允许斜线跨格' : 'Android 连线规则，经过中间点会自动补入';
-    $('#sketch-status').textContent = reason || (conflict ? '已有连线包含跨格连接，已被当前规则排除，可撤回或清空后重画' : hint);
+    const hint = rules.excludeLongDiagonal && rules.excludeLongStraight ? 'sketchAdjacent' : rules.excludeLongDiagonal ? 'sketchDiagonal' : rules.excludeLongStraight ? 'sketchStraight' : 'sketchAndroid';
+    $('#sketch-status').textContent = reason ? t(reason.key, reason.values) : t(conflict ? 'sketchConflict' : hint);
     $('#sketch-status').classList.toggle('is-warning', !!reason || conflict);
   }
 
   function addPoint(point) {
     const result = appendSketchPoint(points, point, getConnectionRules());
     points = result.points;
-    reason = result.reason;
+    reason = result.reasonKey ? { key: result.reasonKey, values: result.reasonValues } : null;
     render();
   }
 
@@ -139,7 +141,7 @@ export function createSketchTool({ getConnectionRules }) {
     pointerId = event.pointerId;
     previous = coordinates(event);
     guide = previous;
-    reason = '';
+    reason = null;
     const button = event.target.closest('[data-sketch-point]');
     if (button) {
       const point = Number(button.dataset.sketchPoint);
@@ -162,14 +164,14 @@ export function createSketchTool({ getConnectionRules }) {
     if (button) addPoint(Number(button.dataset.sketchPoint));
   });
   $('#sketch-undo').addEventListener('click', () => {
-    finish(); points = points.slice(0, -1); reason = ''; render();
+    finish(); points = points.slice(0, -1); reason = null; render();
     if (!points.length) $('[data-sketch-point="1"]').focus();
   });
   $('#sketch-clear').addEventListener('click', () => {
-    finish(); points = []; reason = ''; render();
+    finish(); points = []; reason = null; render();
     $('[data-sketch-point="1"]').focus();
   });
   numberToggle.addEventListener('change', render);
   render();
-  return { refreshRule() { reason = ''; render(); } };
+  return { refreshRule() { reason = null; render(); }, refreshLabels: render };
 }

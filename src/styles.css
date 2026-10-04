@@ -53,8 +53,6 @@
 .sketch-tool summary::-webkit-details-marker{display:none}
 .sketch-tool summary>span:first-child{display:flex;align-items:center;gap:8px}
 .sketch-tool summary svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.sketch-fold:before{content:'展开';font-size:12px;font-weight:400;color:var(--muted)}
-.sketch-tool[open] .sketch-fold:before{content:'收起'}
 .sketch-content{padding:0 13px 14px}
 .sketch-content>.field-hint{margin-top:0}
 .sketch-pad{position:relative;aspect-ratio:1;width:100%;margin-top:13px;border:1px solid #3a4543;border-radius:9px;touch-action:none;user-select:none;-webkit-user-select:none;background:#171d1b}

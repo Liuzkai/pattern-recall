@@ -1,0 +1,18 @@
+export default {
+  language: '语言', tagline: '3 × 3 图案密码回忆工具', privacy: '仅在本地计算', eyebrow: '一点记忆，就能成为线索', heading: '从记得的点，找回那条线', intro: '留下你还记得的线索，让熟悉的图案浮现。', note: '每一个点，都可能是线索',
+  clues: '你的记忆线索', reset: '重置', pointsQuestion: '记得哪些点？', include: '必须包含', exclude: '一定排除', clear: '清除', included: '包含', excluded: '排除', unknown: '不确定', pointHint: '先选模式，再点击九宫格。再次点击可取消。',
+  excludeDiagonal: '排除斜线跨格', diagonalHint: '排除 1 → 8、1 → 9 等长斜线，允许 1 → 5。', excludeStraight: '排除直线跨格', straightHint: '排除 1 → 7、1 → 3 等长直线，允许 1 → 4。',
+  lengthQuestion: '大概连接了多少个点？', min: '最少', max: '最多', lengthHint: '常见手机图案为 4–9 个点，可按记忆调整。', endpointsQuestion: '还记得起点和终点吗？', first: '第一个点', last: '最后一个点', unsure: '不确定', endpointsHint: '选择后会自动包含该点；不确定时不限制。',
+  generate: '列举可能的图案', rules: '图案规则', rulesBody: '每个点只能使用一次。斜线与直线的跨格排除可独立切换，默认均开启。相邻斜线始终允许。1 → 8 属于斜线跨格，1 → 7 属于直线跨格。允许跨格时，连线跨过的中间点必须已经使用。包含的点不限定先后顺序，反向图案分别列举。',
+  resultsEyebrow: '探索可能的连线', results: '可能的图案', export: '导出全部', remaining: '剩余', remainingHint: '当前点数筛选下，未被排除的图案数量', showNumbers: '显示数字', hideDismissed: '隐藏已排除', restoreAll: '恢复全部',
+  footnote: '绿色圆点为起点，箭头表示连接方向。点击图案查看绘制顺序。', footer: '少一点猜测，多一点线索。', footerPrivacy: '线索和图案刷新后清空，仅保存语言偏好。',
+  detailEyebrow: '仔细看看', detailTitle: '看看这条线', close: '关闭图案详情', replay: '重播连线', copy: '复制点序列',
+  sketchTitle: '试画九宫格', expand: '展开', collapse: '收起', sketchHint: '按住拖动画线，也可逐点点击。试着画出记忆中的方向。', sketchPrompt: '试着连一条熟悉的线', drawingOrder: '绘制顺序', undo: '撤回一点', clearSketch: '清空试画', sketchEmpty: '点序列会显示在这里',
+  sketchAdjacent: '仅连接相邻点，允许相邻斜线', sketchDiagonal: '排除斜线跨格，允许直线跨格', sketchStraight: '排除直线跨格，允许斜线跨格', sketchAndroid: 'Android 连线规则，未使用的中间点会自动补入', sketchConflict: '已有连线包含被当前规则排除的连接，可撤回或清空后重画。', sketchRepeat: '点 {point} 已经使用过了。', sketchBlockedDiagonal: '{from} → {to} 属于斜线跨格，当前已排除。', sketchBlockedStraight: '{from} → {to} 属于直线跨格，当前已排除。', sketchDot: '试画点 {point}', sketchDotOrder: '试画点 {point}，第 {order} 个点',
+  dotCount: '{count} 个点', dotName: '点 {point}', all: '全部', includeSummary: '必含 {dots}', excludeSummary: '排除 {dots}', startSummary: '起点 {point}', endSummary: '终点 {point}', unrestricted: '暂无点位限制',
+  endpointExcluded: '{endpoint} {point} 已被排除，请取消该点的排除或更换端点。', sameEndpoints: '每个点只能使用一次，连接多个点时起点和终点不能相同。', requiredCount: '必含点和起终点共需 {count} 个不同点，请增加最多点数。', availableCount: '只剩 {count} 个可用点，请减少排除点或降低最少点数。',
+  busy: '正在列举所有符合条件的图案…', dirty: '线索已调整。点击「列举可能的图案」更新结果。', computed: '已列举 {count} 个符合线索的图案。', hiddenCount: '已隐藏 {count} 个排除的图案。', computeFailed: '本地计算未能启动，请通过 HTTP 服务打开页面后重试。', dismissedCount: '本次候选已排除 {count} 个', showingLength: '正在查看 {count} 点图案',
+  patternLabel: '图案 {order}，{count} 个点，顺序 {sequence}。{status} 点击查看。', dismissLabel: '排除图案 {order}，顺序 {sequence}', restoreLabel: '恢复图案 {order}，顺序 {sequence}', dismissPattern: '排除此图案', restorePattern: '已排除 · 恢复',
+  emptyTitle: '这些线索暂时没有交集', emptyHelp: '试试减少必含点、取消部分排除点，或扩大点数范围。', hiddenTitle: '符合条件的图案都已排除', hiddenHelp: '关闭「隐藏已排除」逐个恢复，或点击下方恢复全部。', pageStatus: '显示 {start}–{end}，共 {total} 个', prev: '上一页', next: '下一页', pagination: '候选图案分页', jump: '跳转页码',
+  detailPoints: '{count} 个点，一条线', detailCaption: '从 {start} 开始，在 {end} 结束', exported: '已导出全部 {count} 个图案', exportFailed: '导出未完成，请重试', copied: '点序列已复制', copyFailed: '复制不可用，可按详情中的数字手动记录', pointLabel: '点 {point}，{state}', filtersLabel: '按点数查看候选', gridLabel: '九宫格，点击设置点的条件', sketchLabel: '九宫格试画区', csvIndex: '序号', csvLength: '点数', csvSequence: '点序列',
+};
