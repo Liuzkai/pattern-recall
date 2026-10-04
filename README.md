@@ -1,17 +1,31 @@
-# 记忆线索 · Pattern Recall
+# Pattern Recall
 
-一个帮助回忆 3×3 图案密码的本地前端工具。通过必含点、排除点、点数范围、起终点和连线范围，穷举全部符合条件的图案，以九宫格图形和点序列展示，并支持逐个排除不熟悉的候选。
+**English** | [简体中文](README.zh-CN.md)
 
-## 本地开发
+A tool for recalling 3×3 Android unlock patterns from the clues you remember. Specify dots, pattern length, endpoints, and connection rules to explore every matching pattern, then dismiss candidates that do not look familiar. All calculations run locally in your browser.
 
-使用 Node.js 20 或更新版本，无需安装依赖：
+[Open the live app](https://liuzkai.github.io/pattern-recall/)
+
+## Features
+
+- Filter by required dots, excluded dots, a length range, and optional start and end dots.
+- Independently exclude long diagonal moves and long horizontal or vertical moves.
+- Practice drawing with a mouse, touch, or keyboard, with optional dot numbers.
+- Browse candidates, dismiss individual patterns, hide dismissed results, and track the remaining count.
+- Inspect drawing order, replay patterns, copy their sequences, and export candidates as CSV.
+- Use a responsive Glassmorphism interface with no backend or runtime dependencies.
+
+## Local development
+
+Requires Node.js 20 or later. No dependency installation is needed.
 
 ```bash
+git clone https://github.com/Liuzkai/pattern-recall.git
 cd pattern-recall
 npm run dev
 ```
 
-打开 http://127.0.0.1:5173/ 。修改 HTML、CSS 或 JavaScript 后刷新页面即可。端口已占用时：
+Open [http://127.0.0.1:5173/](http://127.0.0.1:5173/). Refresh the page after editing HTML, CSS, or JavaScript. To use another port:
 
 ```bash
 npm run dev -- --port 5174
@@ -19,56 +33,58 @@ npm run dev -- --port 5174
 
 ## GitHub Pages
 
-在线地址：[记忆线索](https://liuzkai.github.io/pattern-recall/)。
+Live site: [Pattern Recall](https://liuzkai.github.io/pattern-recall/).
 
-GitHub Pages 使用 `main` 分支的根目录发布。后续推送到 `main` 会自动更新网站，不需要运行 Node.js 服务。根目录的 `.nojekyll` 文件确保 HTML、CSS、JavaScript 和 Worker 按静态文件发布；构建输出 `dist/` 也包含该文件。
+GitHub Pages publishes the root of the `main` branch. Pushing to `main` automatically updates the site; no Node.js server is needed in production. The root `.nojekyll` file ensures that HTML, CSS, JavaScript, and the Worker are published as static files. The `dist/` build output also includes this file.
 
-## 使用
+## Usage
 
-页面采用 Glassmorphism 风格，使用背景光晕、半透明面板和磨砂玻璃层次。
+The app interface is currently in Simplified Chinese. The instructions below include the corresponding on-screen labels. The Glassmorphism design uses soft background glows, translucent panels, and frosted surfaces.
 
-左侧点击「试画九宫格」可展开练习区。支持鼠标或触屏按住拖动、逐点点击，以及键盘 Tab 后用 Enter/Space 选点。关闭练习区的「显示数字」可切换为纯圆点；切换会保留线路，并且与候选图案的点号开关独立。绿色为起点，紫色为终点，下方实时显示点序列。可「撤回一点」或「清空试画」，重复尝试。
+Expand **Practice drawing** (`试画九宫格`) in the left panel. Drag with a mouse or finger, click dots individually, or use Tab followed by Enter/Space. Turn off **Show numbers** (`显示数字`) to draw with plain dots. This preserves your drawing and is independent of the number toggle for candidate patterns. Green marks the start, purple marks the end, and the sequence appears below. Use **Undo one dot** (`撤回一点`) or **Clear drawing** (`清空试画`) to try again.
 
-试画跟随「排除斜线跨格」和「排除直线跨格」两个独立开关。放开对应类别后模拟 Android 自动补入中间点。快速拖动经过的点也会按顺序加入。切换规则会保留草图，已有不符合新规则的连线会显示提示。
+The practice pad follows the two independent crossing filters. When a type of long move is allowed, drawing follows Android's automatic midpoint insertion. Dots crossed during a fast drag are added in order. Changing the rules preserves your drawing and shows a warning if it contains a connection that is now excluded.
 
-1. 选择「必须包含」或「一定排除」，点击九宫格点位。再次点击可取消；「清除」模式把点恢复为不确定。
-2. 「排除斜线跨格」和「排除直线跨格」默认均开启，可独立切换。斜线跨格包括 `1→8`、`1→6`、`1→9`；直线跨格包括 `1→7`、`1→3`。相邻斜线 `1→5` 始终允许。两项均关闭时恢复 Android 原有连线规则。修改后点击「列举可能的图案」更新。
-3. 设置最少、最多点数。默认 4–9，支持 1–9；上下限交叉时自动同步。
-4. 可选择第一个点和最后一个点，默认「不确定」不限制。起点、终点会隐含包含该点；与排除点冲突时会提示修正。
-5. 点击「列举可能的图案」。结果每页展示 24 条，可按点数查看、翻页或直接输入页码。
-6. 点击图案查看方向、完整点序列和动画回放，可复制点序列。
-7. 每张卡片底部有独立的「排除此图案」按钮，排除后图案变暗，按钮变为「已排除 · 恢复」。这不会打开详情。
-8. 开启「隐藏已排除」后，列表、数量和分页会剔除已排除的图案。关闭开关可逐个恢复，也可点击「恢复全部」。标题旁的「剩余」始终显示当前点数筛选下尚未排除的图案数量，不受隐藏开关影响。
-9. 「导出全部」下载本次条件下的完整 CSV，包含序号、点数、点序列。长度标签只影响展示；隐藏开关开启时，导出会剔除已排除图案，覆盖其余所有长度。
+1. Choose **Must include** (`必须包含`) or **Must exclude** (`一定排除`), then click dots in the clue grid. Click a selected dot again to cancel it. **Clear** (`清除`) returns a dot to an unknown state.
+2. **Exclude long diagonals** (`排除斜线跨格`) and **Exclude long straight moves** (`排除直线跨格`) are both enabled by default and can be changed independently. Long diagonals include `1→8`, `1→6`, and `1→9`; long straight moves include `1→7` and `1→3`. Adjacent diagonals such as `1→5` remain allowed. Disable both filters to use the standard Android rules. Click **List possible patterns** (`列举可能的图案`) after changing clues or rules.
+3. Set the minimum and maximum number of dots. The default is 4–9; the supported range is 1–9. Changing one bound past the other updates both bounds to keep the range valid.
+4. Optionally select the first and last dots. **Not sure** (`不确定`) leaves an endpoint unrestricted. A chosen endpoint is automatically required; a conflict with an excluded dot prompts you to adjust the clues.
+5. Click **List possible patterns** (`列举可能的图案`). Results show 24 patterns per page. Filter by length, move between pages, or enter a page number directly.
+6. Click a pattern to inspect its direction, full sequence, and animated replay. You can also copy the sequence.
+7. Each card has a separate **Exclude this pattern** (`排除此图案`) button. Excluded cards dim, and the button changes to **Excluded · Restore** (`已排除 · 恢复`). Excluding a card does not open its details.
+8. Enable **Hide excluded** (`隐藏已排除`) to remove dismissed patterns from the list, total count, and pagination. Disable it to restore individual patterns, or choose **Restore all** (`恢复全部`). The **Remaining** (`剩余`) badge always counts undismissed patterns within the selected length filter, whether dismissed cards are visible or hidden.
+9. **Export all** (`导出全部`) downloads a CSV containing the candidate number, length, and dot sequence. The length tabs affect browsing only. If **Hide excluded** is enabled, the export omits dismissed patterns but includes every other matching length.
 
-绿色点代表起点，紫色轮廓代表终点，连线上的箭头表示方向。必含点不限定先后顺序。
+Green dots mark starting points, purple outlines mark endpoints, and arrows indicate the direction of each connection. Required dots do not have a prescribed order.
 
-图案排除记录按实际点序列保存，跨翻页、点数切换、条件更改和重新列举保留，刷新页面或点击「恢复全部」后清空。「重置」只重置左侧记忆线索。卡片编号来自本次完整候选列表，隐藏或切换点数后不会重新编号。
+Dismissals are stored by the actual dot sequence and survive pagination, length changes, clue changes, and regeneration. Reloading the page or choosing **Restore all** clears them. **Reset** (`重置`) restores the clue inputs only. Card numbers come from the full candidate set for the current query and stay stable when patterns are hidden or filtered by length.
 
-## 图案规则
+## Pattern rules
 
-遵循 Android 的有效点序列规则：
+The enumerator follows Android's rules for valid dot sequences:
 
-- 点号按行编号：`1 2 3 / 4 5 6 / 7 8 9`。
-- 每个点最多使用一次，顺序决定图案。
-- 跨过一个中间点时，中间点必须已经出现。例如 `1→3` 不能直接起笔；`2→1→3` 合法。
-- Android 绘制时会自动补入尚未经过的中间点，因此 `1→3` 实际保存为 `1→2→3`，本工具列举的是实际保存的序列。
-- 默认 4–9 点对应常见 Android 最短长度。1–3 点用于扩大回忆范围，通常不能设为 Android 解锁密码。
-- 固定起点只从该点开始，固定终点必须在该点结束；多点图案的起点、终点不能相同，单点图案允许相同。
-- 不合并旋转、镜像或反向序列；反向序列只在自身也满足规则时出现。
+- Dots are numbered by row: `1 2 3 / 4 5 6 / 7 8 9`.
+- Each dot can be used at most once. Order matters.
+- A direct connection crossing a midpoint requires that midpoint to have already been used. For example, `1→3` cannot be the first recorded connection, but `2→1→3` is valid.
+- Android drawing automatically inserts an unused midpoint. Drawing `1→3` therefore records `1→2→3`. This tool enumerates the recorded sequences.
+- The default 4–9 range matches the usual Android minimum length. Lengths 1–3 let you explore partial memories and generally cannot be used as Android unlock patterns.
+- A fixed start must be the first dot, and a fixed end must be the last. They cannot be the same in a pattern with multiple dots; a single-dot pattern may use the same start and end.
+- Rotations, reflections, and reversed sequences are not merged. A reversed sequence is listed only if it independently satisfies the rules.
 
-跨格指两点的行号或列号变化超过 1；同行或同列的跨格属于直线，其余属于斜线。两个排除开关同时开启时只允许相邻的八个方向，已经访问过的中间点也不会放宽该限制。无其他条件时，4–9 点的四种组合数量：
+A move is considered **long** if its row or column changes by more than one. Long moves within a row or column are straight; all other long moves are diagonal. Enabling both exclusion filters allows only the eight neighboring directions. A previously visited midpoint does not relax these exclusions.
 
-| 排除斜线跨格 | 排除直线跨格 | 图案数 |
+With no other restrictions, the four filter combinations produce these totals for lengths 4–9:
+
+| Exclude long diagonals | Exclude long straight moves | Patterns |
 | --- | --- | ---: |
-| 否 | 否 | 389,112 |
-| 否 | 是 | 189,744 |
-| 是 | 否 | 29,312 |
-| 是 | 是 | 10,096 |
+| No | No | 389,112 |
+| No | Yes | 189,744 |
+| Yes | No | 29,312 |
+| Yes | Yes | 10,096 |
 
-两项排除均关闭、且不加其他限制时，4–9 点共有 **389,112** 条 Android 有效序列。各长度数量：
+With both exclusions disabled and no other restrictions, there are **389,112** Android patterns of length 4–9. Counts by length:
 
-| 点数 | 图案数 |
+| Dots | Patterns |
 | --- | ---: |
 | 1 | 9 |
 | 2 | 56 |
@@ -80,9 +96,9 @@ GitHub Pages 使用 `main` 分支的根目录发布。后续推送到 `main` 会
 | 8 | 140,704 |
 | 9 | 140,704 |
 
-规则参考 AOSP [LockPatternView](https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/com/android/internal/widget/LockPatternView.java) 和 [LockPatternUtils](https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/com/android/internal/widget/LockPatternUtils.java)。
+Rule references: AOSP [LockPatternView](https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/com/android/internal/widget/LockPatternView.java) and [LockPatternUtils](https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/com/android/internal/widget/LockPatternUtils.java).
 
-## 验证与构建
+## Verification and build
 
 ```bash
 npm test
@@ -90,26 +106,27 @@ npm run build
 npm run preview
 ```
 
-构建把静态资源复制到 `dist/`，可交给任意静态服务器。请通过 HTTP 服务打开，直接双击 HTML 的 `file://` 模式无法可靠加载 ES 模块和 Worker。
+The build copies static assets into `dist/`, ready for any static host. Serve the app over HTTP: opening `index.html` directly with a `file://` URL does not reliably support ES modules and Workers.
 
-## 结构
+## Project structure
 
 ```text
-index.html             页面结构
-favicon.svg            站点图标
-src/app.js             输入、候选排除与隐藏、分页、详情、CSV 导出
-src/patterns.js         纯枚举算法与分页函数
-src/connections.js      斜线/直线跨格分类与独立规则
-src/worker.js           后台线程计算与结果转移
-src/render.js           SVG 图案和方向箭头
-src/sketch.js           试画序列、手势命中、画板交互
-src/styles.css         响应式样式
-src/glass.css          玻璃主题与试画圆点外观
-scripts/serve.mjs       零依赖本地静态服务器
-scripts/build.mjs       静态资源构建
-tests/                 核心算法与交互逻辑验证
+index.html             Page markup
+favicon.svg            Site icon
+src/app.js             Clues, dismissals, filters, pagination, details, CSV export
+src/patterns.js         Pattern enumeration and pagination
+src/connections.js     Classification and independent rules for long moves
+src/worker.js          Background computation and result transfer
+src/render.js          SVG patterns and direction arrows
+src/sketch.js          Practice sequences, gesture hit detection, drawing controls
+src/styles.css         Responsive layout and base styles
+src/glass.css          Glass theme and practice dot appearance
+scripts/serve.mjs      Static development server with no dependencies
+scripts/build.mjs      Static asset build
+.nojekyll              GitHub Pages static publishing marker
+tests/                 Algorithm and interaction checks
 ```
 
-枚举采用深度优先搜索及位掩码条件剪枝。完整结果存储于 `Uint32Array`，通过 Worker 转移至页面，每次只渲染一页。导出按块生成 CSV，避免长时间阻塞交互。所有计算都在浏览器本地进行，不发起外部请求、不上传点位、不持久保存线索。
+Enumeration uses depth-first search with bitmask pruning. Results are stored in a `Uint32Array` and transferred from a Worker. Only one page is rendered at a time. CSV exports are generated in chunks to avoid blocking interaction. Clues and patterns are processed locally, are not uploaded, and are not persisted between page reloads.
 
-在支持 WebMCP 的浏览器中，页面还会注册可选的 `enumerate_pattern_candidates` 工具，与可见界面共用同一套状态和操作。`excludeLongDiagonal` 和 `excludeLongStraight` 分别控制斜线/直线跨格排除。兼容旧参数 `adjacentOnly`（默认 `true`），同时设置两项默认值，显式独立参数优先。不支持时不影响正常使用。
+In browsers that support WebMCP, the page optionally registers an `enumerate_pattern_candidates` tool using the same state and actions as the interface. `excludeLongDiagonal` and `excludeLongStraight` control the two crossing exclusions independently. The legacy `adjacentOnly` option defaults to `true` and provides a shared default for both filters; explicit individual options take precedence. Browsers without WebMCP can use the app normally.
