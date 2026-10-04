@@ -153,7 +153,7 @@ function renderResults({ scroll = false } = {}) {
   if (scroll) $('#results-title').scrollIntoView({ behavior: 'auto', block: 'start' });
 }
 
-async function generatePatterns() {
+async function generatePatterns({ revealResults = false } = {}) {
   const query = constraints();
   const error = constraintError(query);
   if (error) { renderInputs(); return null; }
@@ -182,6 +182,10 @@ async function generatePatterns() {
     state.busy = false;
     refreshCandidates();
     renderResults();
+    if (revealResults && window.matchMedia?.('(max-width: 760px)').matches) {
+      $('#results-panel').scrollIntoView({ behavior: 'auto', block: 'start' });
+      $('#results-panel').focus({ preventScroll: true });
+    }
     return { total: state.active.length, enumeratedTotal: data.total, dismissed: state.dismissedCount, counts: Array.from(state.activeCounts), page: 1, pageCount: Math.max(1, Math.ceil(state.active.length / PAGE_SIZE)), firstPage: Array.from(state.active.subarray(0, PAGE_SIZE), String) };
   } catch {
     if (!worker || state.worker === worker) {
@@ -348,7 +352,11 @@ $('#start-point').addEventListener('change', event => { state.startPoint = Numbe
 $('#end-point').addEventListener('change', event => { state.endPoint = Number(event.target.value); renderInputs(); });
 $('#exclude-long-diagonal').addEventListener('change', event => { state.excludeLongDiagonal = event.target.checked; renderInputs(); });
 $('#exclude-long-straight').addEventListener('change', event => { state.excludeLongStraight = event.target.checked; renderInputs(); });
-$('#clue-form').addEventListener('submit', event => { event.preventDefault(); void generatePatterns(); });
+$('#clue-form').addEventListener('submit', event => { event.preventDefault(); void generatePatterns({ revealResults: true }); });
+$('#mobile-nav').addEventListener('click', event => {
+  const link = event.target.closest('[data-section]');
+  if (link?.dataset.section === 'sketch-tool') $('#sketch-tool').open = true;
+});
 $('#reset').addEventListener('click', reset);
 $('#empty-reset').addEventListener('click', () => {
   const allHidden = state.hideDismissed && state.visible.length === 0 && filterByLength(state.patterns, state.length).length > 0;

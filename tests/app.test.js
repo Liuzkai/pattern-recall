@@ -35,7 +35,7 @@ class Element {
   removeAttribute(key) { this.attributes.delete(key); }
   insertAdjacentHTML(_, content) { this.innerHTML += content; }
   focus() { focused = this.selector; }
-  scrollIntoView() {}
+  scrollIntoView() { scrolled = this.selector; }
   setPointerCapture(id) { this.capturedPointer = id; }
   releasePointerCapture() { this.capturedPointer = null; }
   showModal() { this.open = true; }
@@ -43,7 +43,7 @@ class Element {
   getBoundingClientRect() { return { left: 0, right: 440, top: 0, bottom: 440 }; }
 }
 
-let focused;
+let focused, scrolled;
 const elements = new Map();
 function element(selector) {
   if (!elements.has(selector)) elements.set(selector, new Element(selector));
@@ -130,7 +130,8 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
   };
   const preferences = new Map();
   globalThis.localStorage = { getItem: key => preferences.get(key), setItem: (key, value) => preferences.set(key, value) };
-  globalThis.window = { addEventListener() {} };
+  let compactViewport = true;
+  globalThis.window = { addEventListener() {}, matchMedia: () => ({ matches: compactViewport }) };
   const changeLanguage = async locale => { element('#language').value = locale; await element('#language').dispatch('change'); };
   globalThis.Worker = BrowserWorker;
   URL.createObjectURL = blob => { const id = `blob:test-${blobUrls.size}`; blobUrls.set(id, blob); return id; };
@@ -139,11 +140,14 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
   try {
     await import('../src/app.js');
     await settle(() => element('#total-count').textContent === '10,096', 'default adjacent enumeration');
+    assert.equal(scrolled, undefined, 'initial enumeration does not jump past the clues on mobile');
     assert.equal(element('#language').value, 'en', 'first visit defaults to English');
     assert.equal(document.documentElement.lang, 'en');
     assert.equal(element('#generate span').textContent, 'Find possible patterns');
     assert.equal(preferences.size, 0, 'nothing is persisted on first load');
     await changeLanguage('zh-CN');
+    assert.equal(scrolled, undefined, 'changing languages does not move the mobile viewport');
+    compactViewport = false;
     assert.equal(element('#exclude-long-diagonal').checked, true);
     assert.equal(element('#exclude-long-straight').checked, true);
     assert.equal(element('#remaining-count').textContent, '10,096');
@@ -151,15 +155,22 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.match(element('#result-status').textContent, /线索已调整/);
     await element('#clue-form').dispatch('submit');
     await settle(() => element('#total-count').textContent === '189,744', 'straight-only crossing exclusion');
+    assert.equal(scrolled, undefined, 'desktop submissions preserve the viewport');
     assert.match(element('#result-description').textContent, /排除直线跨格/);
     assert.doesNotMatch(element('#result-description').textContent, /排除斜线跨格/);
     await setConnectionRules(true, false);
+    compactViewport = true;
     await element('#clue-form').dispatch('submit');
     await settle(() => element('#total-count').textContent === '29,312', 'diagonal-only crossing exclusion');
+    assert.equal(scrolled, '#results-panel', 'a successful mobile submission reveals the results');
+    assert.equal(focused, '#results-panel', 'keyboard focus follows the newly revealed results');
+    scrolled = undefined;
     assert.match(element('#result-description').textContent, /排除斜线跨格/);
     assert.doesNotMatch(element('#result-description').textContent, /排除直线跨格/);
     const mixedTool = await runQuery({ included: [], excluded: [], minLength: 4, maxLength: 9, adjacentOnly: true, excludeLongDiagonal: false });
     assert.equal(mixedTool.enumeratedTotal, 189744, 'explicit individual option overrides the legacy combined default');
+    assert.equal(scrolled, undefined, 'tool-driven enumeration does not move the mobile viewport');
+    compactViewport = false;
     assert.equal(element('#exclude-long-diagonal').checked, false);
     assert.equal(element('#exclude-long-straight').checked, true);
     await setConnectionRules(true, true);
@@ -187,6 +198,12 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(element('#show-numbers').checked, true, 'sketch appearance is independent of result point labels');
     assert.equal(element('#included-count').textContent, 0, 'practice drawing leaves memory clues independent');
     assert.equal(element('#total-count').textContent, '10,096');
+    element('#sketch-tool').open = false;
+    await element('#mobile-nav').dispatch('click', { target: target({ section: 'clue-panel' }) });
+    assert.equal(element('#sketch-tool').open, false);
+    await element('#mobile-nav').dispatch('click', { target: target({ section: 'sketch-tool' }) });
+    assert.equal(element('#sketch-tool').open, true, 'practice navigation opens the collapsed pad');
+    assert.deepEqual(sketchPoints(), [1, 5, 9], 'practice navigation preserves the drawing');
     await element('#sketch-undo').dispatch('click');
     assert.deepEqual(sketchPoints(), [1, 5]);
     await element('#sketch-clear').dispatch('click');
@@ -204,6 +221,13 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     await element('#sketch-undo').dispatch('click');
     assert.equal(focused, '[data-sketch-point="1"]', 'undoing the last point preserves usable focus');
     await element('#sketch-clear').dispatch('click');
+    element('[data-sketch-point="1"]').offsetWidth = 44;
+    const nearMobileDot = { ...pointer(1), clientX: pointer(1).clientX - 21, target: target({}) };
+    await element('#sketch-pad').dispatch('pointerdown', nearMobileDot);
+    await element('#sketch-pad').dispatch('pointercancel', nearMobileDot);
+    assert.deepEqual(sketchPoints(), [1], 'gesture detection uses the enlarged mobile point radius');
+    await element('#sketch-clear').dispatch('click');
+    element('[data-sketch-point="1"]').offsetWidth = 38;
     await element('#sketch-pad').dispatch('pointerdown', pointer(1));
     await element('#sketch-pad').dispatch('pointermove', pointer(3));
     await element('#sketch-pad').dispatch('pointerup', pointer(3));
@@ -311,10 +335,16 @@ test('offline UI journey exercises real Worker, filters, ranges, details, export
     assert.equal(element('#max-length').value, 7, 'crossing ranges synchronize');
     assert.equal(element('#generate').disabled, true);
     assert.match(element('#form-error').textContent, /可用点/);
+    compactViewport = true;
+    scrolled = undefined;
+    await element('#clue-form').dispatch('submit');
+    assert.equal(scrolled, undefined, 'invalid mobile submissions stay with the validation error');
 
     failNextWorker = true;
     await element('#reset').dispatch('click');
     await settle(() => element('#result-status').textContent.includes('未能启动'), 'worker failure');
+    assert.equal(scrolled, undefined, 'failed enumeration does not reveal stale results');
+    compactViewport = false;
     assert.equal(element('#exclude-long-diagonal').checked, true);
     assert.equal(element('#exclude-long-straight').checked, true);
     await setConnectionRules(false, false);

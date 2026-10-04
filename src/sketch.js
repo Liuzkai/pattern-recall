@@ -109,7 +109,8 @@ export function createSketchTool({ getConnectionRules }) {
 
   function hitRadius() {
     const bounds = pad.getBoundingClientRect();
-    return 19 * 160 / (bounds.right - bounds.left);
+    const diameter = $('[data-sketch-point="1"]').offsetWidth || 38;
+    return diameter / 2 * 160 / (bounds.right - bounds.left);
   }
 
   function move(event) {

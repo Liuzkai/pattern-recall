@@ -14,6 +14,7 @@ A tool for recalling 3×3 Android unlock patterns from the clues you remember. S
 - Browse candidates, dismiss individual patterns, hide dismissed results, and track the remaining count.
 - Inspect drawing order, replay patterns, copy their sequences, and export candidates as CSV.
 - Use a responsive Glassmorphism interface with no backend or runtime dependencies.
+- On phones, jump between clues, results, and practice with a sticky navigation bar and larger touch controls.
 - Switch between 14 interface languages, with English as the first-visit default and support for right-to-left text.
 
 ## Local development
@@ -43,6 +44,8 @@ GitHub Pages publishes the root of the `main` branch. Pushing to `main` automati
 The interface defaults to English. Use the language selector in the header to choose English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, Spanish, Hindi, Arabic, Bengali, Portuguese, Russian, Urdu, or Indonesian. Your language preference is saved locally; switching languages preserves clues, exclusions, pagination, and the practice drawing. Arabic and Urdu use right-to-left text, while the physical dot layout and sequence direction remain unchanged.
 
 Labels, validation messages, pattern details, accessibility labels, and CSV column headers follow the selected language. An export keeps the language selected when it started. The Glassmorphism design uses soft background glows, translucent panels, and frosted surfaces.
+
+On screens up to 760 px wide, panels stack vertically and a sticky navigation bar links to clues, results, and practice. Finding patterns automatically brings the results into view. Candidate cards adapt to the available width, and the detail dialog scrolls within the screen. The practice link opens a collapsed pad without clearing the drawing.
 
 **Practice drawing** (`试画九宫格`) is a separate card at the bottom of the left column, below the clue panel. It opens by default and can be collapsed. Drag with a mouse or finger, click dots individually, or use Tab followed by Enter/Space. Turn off **Show numbers** (`显示数字`) to draw with plain dots. This preserves your drawing and is independent of the number toggle for candidate patterns. Green marks the start, purple marks the end, and the sequence appears below. Use **Undo one dot** (`撤回一点`) or **Clear drawing** (`清空试画`) to try again.
 
@@ -124,6 +127,7 @@ src/render.js          SVG patterns and direction arrows
 src/sketch.js          Practice sequences, gesture hit detection, drawing controls
 src/styles.css         Responsive layout and base styles
 src/glass.css          Glass theme, practice card, responsive and RTL layout
+src/mobile.css         Phone layout, touch targets, safe areas, and quick navigation
 src/i18n.js            Language selection, formatting, and text updates
 src/locales/           Complete message catalogs for 14 interface languages
 scripts/serve.mjs      Static development server with no dependencies
