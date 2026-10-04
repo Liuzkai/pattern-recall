@@ -17,6 +17,12 @@ npm run dev
 npm run dev -- --port 5174
 ```
 
+## GitHub Pages
+
+在线地址：[记忆线索](https://liuzkai.github.io/pattern-recall/)。
+
+GitHub Pages 使用 `main` 分支的根目录发布。后续推送到 `main` 会自动更新网站，不需要运行 Node.js 服务。根目录的 `.nojekyll` 文件确保 HTML、CSS、JavaScript 和 Worker 按静态文件发布；构建输出 `dist/` 也包含该文件。
+
 ## 使用
 
 页面采用 Glassmorphism 风格，使用背景光晕、半透明面板和磨砂玻璃层次。
