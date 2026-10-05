@@ -94,9 +94,10 @@ legend { font-size: 14px; font-weight: 500; }
 .mode-switch button:hover { color: var(--text); }
 .mode-indicator, .switch-ui, button svg, summary svg, .privacy-badge svg { flex-shrink: 0; }
 .input-grid { width: 100%; padding: 14px 12px; gap: 20px; background: radial-gradient(circle, #594444 .7px, transparent .9px) center/12px 12px; }
-.point-button { background: #231b1c; border-color: #665253; color: var(--text); box-shadow: 0 0 0 6px var(--surface); }
+.point-button { width: 44px; height: 44px; background: #231b1c; border-color: #665253; color: var(--text); box-shadow: 0 0 0 6px var(--surface); font: 400 25px/1 var(--display-font); }
+.point-button.excluded:after { top: 50%; }
 .point-button:hover { background: #362829; border-color: var(--accent); }
-.point-button.included, .point-button.included:hover { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+.point-button.included, .point-button.included:hover { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); font-weight: 400; }
 .point-button.excluded, .point-button.excluded:hover { background: #362123; border-color: var(--coral); color: var(--coral); }
 .legend-dot.neutral { background: #9b8582; }
 .grid-legend { flex-wrap: wrap; gap: 6px 12px; font-size: 11px; }
@@ -158,10 +159,10 @@ select option { background: #21191b; color: var(--text); }
 .pattern-svg .used-dot { fill: #282c25; stroke: #b2bfa7; }
 .pattern-svg .start-dot { fill: var(--lime); stroke: var(--lime); }
 .pattern-svg .end-dot { fill: #241d28; stroke: var(--purple); }
-.pattern-svg .point-label { fill: #e0e5d8; }
-.pattern-svg .start-label { fill: var(--lime-ink); }
+.pattern-svg .point-label { fill: #e0e5d8; stroke: none; font-family: var(--display-font); font-size: 12px; font-weight: 400; }
+.pattern-svg .start-label { fill: var(--lime-ink); font-weight: 400; }
 .pattern-svg .end-label { fill: var(--purple); }
-.pattern-sequence { border-top-color: var(--border); color: var(--muted); padding: 10px 6px; }
+.pattern-sequence { border-top-color: var(--border); color: var(--muted); padding: 10px 6px; font-family: var(--display-font); font-size: 17px; letter-spacing: .02em; }
 .pattern-sequence .seq-arrow { color: #af8a81; }
 .pattern-card:hover .pattern-sequence { color: var(--text); }
 .pattern-dismiss { flex: 1; background: #23191b; border-top-color: var(--border); color: var(--muted); font-size: 11px; min-height: 40px; }
@@ -177,7 +178,14 @@ select option { background: #21191b; color: var(--text); }
 
 .sketch-tool.practice-panel { margin: 0; }
 .practice-panel summary { padding: 20px; gap: 12px; color: var(--accent-hover); }
-.practice-panel .sketch-content { padding: 0 20px 20px; }
+.practice-panel .sketch-content { padding: 0 12px 16px; }
+.sketch-phone { position: relative; width: 100%; max-width: 330px; margin: 0 auto; padding: 36px 14px 28px; border: 2px solid #806561; border-radius: 32px; background: #100c0d; box-shadow: inset 0 0 0 3px #201719, 0 8px 24px #0003; }
+.sketch-phone:before, .sketch-phone:after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; border-radius: 8px; }
+.sketch-phone:before { top: 14px; width: 44px; height: 5px; background: #6d5351; }
+.sketch-phone:after { bottom: 11px; width: 64px; height: 3px; background: #a78c85; }
+.sketch-phone > .field-hint { margin-top: 0; text-align: center; line-height: 1.7; }
+.sketch-phone .sketch-pad { background: #130e10; border-color: transparent; border-radius: 8px; }
+.sketch-phone .sketch-actions > button { min-height: 44px; }
 .sketch-fold { font-size: 11px; font-weight: 400; color: var(--subtle); }
 .sketch-fold:before, .sketch-tool[open] .sketch-fold:before { content: none; }
 .sketch-tool .when-open, .sketch-tool[open] .when-closed { display: none; }
@@ -188,10 +196,10 @@ select option { background: #21191b; color: var(--text); }
 .sketch-pad { background: #0f0c0d; border-color: #443335; border-radius: 6px; box-shadow: none; }
 .sketch-line { stroke: #b8c4ac; }
 .sketch-guide { stroke: #b29990; opacity: .8; }
-.sketch-point { background: #251d1f; border-color: #705557; color: var(--text); box-shadow: none; }
+.sketch-point { background: #251d1f; border-color: #705557; color: var(--text); box-shadow: none; font: 400 23px/1 var(--display-font); }
 .sketch-point:hover { background: #38282a; border-color: var(--accent-hover); }
 .sketch-point.is-used { background: #2b3227; border-color: #b2bfa7; color: #dce6d3; }
-.sketch-point.is-start { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+.sketch-point.is-start { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); font-weight: 400; }
 .sketch-point.is-end { border-color: var(--purple); color: var(--purple); }
 .sketch-meta { flex-wrap: wrap; gap: 8px; }
 .sketch-actions > button { min-width: 0; }
@@ -207,6 +215,8 @@ select option { background: #21191b; color: var(--text); }
 .dialog-heading h2 { font: 400 32px/1.2 var(--display-font); }
 .detail-pattern { background: #120d0f; border-color: #443335; border-radius: 6px; }
 .detail-sequence .seq-number, .sketch-sequence .seq-number { background: #2c3227; color: #d6e1cc; border: 1px solid #46513c; border-radius: 3px; }
+.detail-sequence .seq-number { font-family: var(--display-font); font-size: 22px; }
+.sketch-sequence .seq-number { font-family: var(--display-font); font-size: 20px; }
 .toast { background: #e7b1a4; border: 1px solid #f1c9bf; color: var(--accent-ink); border-radius: 5px; box-shadow: 0 10px 30px #0006; }
 .site-footer { max-width: 1208px; padding-inline: 0; padding-block: 24px 32px; margin-top: 44px; gap: 16px; color: var(--subtle); }
 .site-footer > span { max-width: 65%; }

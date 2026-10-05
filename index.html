@@ -8,8 +8,8 @@
     <title>3 × 3 pattern memory helper · Pattern Recall</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20261005" />
     <link rel="stylesheet" href="./src/styles.css" />
-    <link rel="stylesheet" href="./src/theme.css?v=20261005" />
-    <link rel="stylesheet" href="./src/mobile.css?v=20261005" />
+    <link rel="stylesheet" href="./src/theme.css?v=20261005.2" />
+    <link rel="stylesheet" href="./src/mobile.css?v=20261005.2" />
     <script type="module" src="./src/app.js"></script>
   </head>
   <body>
@@ -77,6 +77,7 @@
           <details class="sketch-tool practice-panel" id="sketch-tool" open>
             <summary><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 12-12 4 4L8 20H4zm10-10 4 4"/></svg><span data-i18n="sketchTitle">Practice drawing</span></span><span class="sketch-fold" aria-hidden="true"><span class="when-closed" data-i18n="expand">Expand</span><span class="when-open" data-i18n="collapse">Collapse</span></span></summary>
             <div class="sketch-content">
+              <div class="sketch-phone">
               <p class="field-hint"><span data-i18n="sketchHint">Drag or select dots one at a time. Try a direction that feels familiar.</span></p>
               <div class="sketch-toolbar"><span><span data-i18n="sketchPrompt">Trace a familiar line</span></span><label class="number-toggle"><input id="sketch-show-numbers" type="checkbox" checked/><span class="switch-ui" aria-hidden="true"></span><span data-i18n="showNumbers">Show numbers</span></label></div>
               <div id="sketch-pad" class="sketch-pad" role="group" aria-label="Practice drawing grid" data-i18n-aria-label="sketchLabel"><svg id="sketch-lines" viewBox="0 0 160 160" aria-hidden="true"></svg><div id="sketch-points"></div></div>
@@ -84,6 +85,7 @@
               <div id="sketch-sequence" class="sketch-sequence"></div>
               <p id="sketch-status" class="sketch-status" role="status" aria-live="polite"></p>
               <div class="sketch-actions"><button id="sketch-undo" class="secondary-button" type="button" disabled><span data-i18n="undo">Undo one dot</span></button><button id="sketch-clear" class="secondary-button" type="button" disabled><span data-i18n="clearSketch">Clear drawing</span></button></div>
+              </div>
             </div>
           </details>
         </div>

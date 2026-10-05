@@ -78,7 +78,7 @@
   .mode-switch { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .7fr); }
   .mode-switch button { min-width: 0; min-height: 46px; font-size: 13px; gap: 5px; }
   .input-grid { width: 100%; max-width: 300px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 12px; padding: 12px 8px; margin: 18px auto; }
-  .point-button { width: 56px; max-width: 100%; height: auto; aspect-ratio: 1; font-size: 19px; }
+  .point-button { width: 44px; max-width: 100%; height: 44px; font-size: 25px; }
   .point-button.excluded:after { top: 50%; }
   .grid-legend { gap: 6px 12px; font-size: 12px; }
   .field-hint, .constraint-summary { font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
@@ -101,10 +101,10 @@
 
   .sketch-tool.practice-panel { border-radius: 8px; }
   .practice-panel summary { min-height: 60px; padding: 16px; gap: 10px; }
-  .practice-panel .sketch-content { padding: 0 16px 16px; }
+  .practice-panel .sketch-content { padding: 0 12px 16px; }
   .practice-panel .sketch-pad { max-width: 340px; margin: 12px auto 0; }
   .sketch-toolbar { gap: 4px 12px; }
-  .sketch-point { width: 44px; height: 44px; font-size: 16px; }
+  .sketch-point { width: 44px; height: 44px; font-size: 23px; }
   .sketch-status { font-size: 13px; }
   .sketch-actions > button { min-height: 44px; font-size: 13px; }
 
@@ -130,7 +130,7 @@
   .card-top { padding: 10px 8px 0; gap: 4px; flex-wrap: wrap; }
   .card-id { font-size: 10px; }
   .card-length { font-size: 10px; padding: 1px 3px; }
-  .pattern-sequence { font-size: 11px; gap: 2px; padding: 9px 5px; min-height: 36px; }
+  .pattern-sequence { font-size: 16px; gap: 2px; padding: 9px 5px; min-height: 36px; }
   .pattern-sequence .seq-arrow { font-size: 9px; }
   .pattern-dismiss { min-height: 48px; font-size: 12px; padding: 10px 6px; }
   .pagination { display: flex; flex-direction: column; align-items: stretch; gap: 12px; font-size: 13px; }
@@ -159,7 +159,7 @@
   .detail-pattern { margin-top: 16px; }
   .detail-pattern .pattern-svg { max-height: min(42dvh, 300px); }
   .detail-sequence { gap: 4px; margin-top: 16px; }
-  .detail-sequence .seq-number { width: 23px; height: 28px; font-size: 13px; }
+  .detail-sequence .seq-number { width: 23px; height: 28px; font-size: 20px; }
   .dialog-actions { gap: 8px; margin-top: 18px; }
   .dialog-actions > button { min-width: 0; min-height: 48px; padding: 10px 8px; }
   .toast { width: max-content; max-width: calc(100vw - 32px); bottom: calc(16px + env(safe-area-inset-bottom)); padding: 12px 16px; text-align: center; overflow-wrap: anywhere; }
