@@ -1,4 +1,8 @@
 export default {
+  theme: "Theme",
+  themeConsole: "Pixel console",
+  themeWarm: "Warm editorial",
+
   language: 'Language', tagline: '3 × 3 pattern memory helper', privacy: 'Calculated on your device',
   eyebrow: 'A little memory goes a long way', heading: 'Find the line you remember', intro: 'Start with the clues you remember. Let a familiar pattern emerge.', note: 'Every dot can be a clue',
   clues: 'Your memory clues', reset: 'Reset', pointsQuestion: 'Which dots do you remember?', include: 'Must include', exclude: 'Must exclude', clear: 'Clear', included: 'Included', excluded: 'Excluded', unknown: 'Unknown', pointHint: 'Choose a mode, then select dots. Select a dot again to undo.',
@@ -6,7 +10,7 @@ export default {
   lengthQuestion: 'How many dots were connected?', min: 'Minimum', max: 'Maximum', lengthHint: 'Phone patterns usually use 4–9 dots. Adjust to match your memory.', endpointsQuestion: 'Remember the start or end?', first: 'First dot', last: 'Last dot', unsure: 'Not sure', endpointsHint: 'Selected endpoints are required. Leave them unknown for no restriction.',
   generate: 'Find possible patterns', rules: 'Pattern rules', rulesBody: 'Each dot can be used once. Long diagonal and straight moves can be excluded separately; both filters start enabled. Adjacent diagonals remain allowed. 1 → 8 is a long diagonal; 1 → 7 is a long straight line. When a long move crosses a dot, that dot must already be used. Required dots have no fixed order. Reverse sequences are listed separately.',
   resultsEyebrow: 'Explore the possibilities', results: 'Possible patterns', export: 'Export all', remaining: 'Remaining', remainingHint: 'Undismissed patterns within the current length filter', showNumbers: 'Show numbers', hideDismissed: 'Hide excluded', restoreAll: 'Restore all',
-  footnote: 'Green marks the start; arrows show the direction. Select a pattern to see the drawing order.', footer: 'Less guessing. More clues.', footerPrivacy: 'Clues and patterns clear on reload. Only your language preference is saved.',
+  footnote: 'Green marks the start; arrows show the direction. Select a pattern to see the drawing order.', footer: 'Less guessing. More clues.', footerPrivacy: "Clues and patterns clear on reload. Only language and theme preferences are saved.",
   detailEyebrow: 'Take a closer look', detailTitle: 'Follow this line', close: 'Close details', replay: 'Replay', copy: 'Copy sequence',
   sketchTitle: 'Practice drawing', expand: 'Expand', collapse: 'Collapse', sketchHint: 'Drag or select dots one at a time. Try a direction that feels familiar.', sketchPrompt: 'Trace a familiar line', drawingOrder: 'Drawing order', undo: 'Undo one dot', clearSketch: 'Clear drawing', sketchEmpty: 'Your sequence will appear here',
   sketchAdjacent: 'Neighboring dots only; adjacent diagonals allowed', sketchDiagonal: 'Long diagonals excluded; long straight lines allowed', sketchStraight: 'Long straight lines excluded; long diagonals allowed', sketchAndroid: 'Android rules: unused midpoints are added automatically', sketchConflict: 'Your drawing has a connection excluded by these rules. Undo or clear to try again.', sketchRepeat: 'Dot {point} is already used.', sketchBlockedDiagonal: '{from} → {to} is a long diagonal and is excluded.', sketchBlockedStraight: '{from} → {to} is a long straight line and is excluded.', sketchDot: 'Practice dot {point}', sketchDotOrder: 'Practice dot {point}, step {order}',
