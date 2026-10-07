@@ -1,0 +1,163 @@
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('./fonts/Silkscreen-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* The selector is shared by both themes. Each theme owns its own surface colors. */
+.theme-picker { position: relative; display: flex; align-items: center; min-width: 0; }
+.theme-symbol { position: absolute; inset-inline-start: 12px; pointer-events: none; color: var(--accent); font: 20px/1 monospace; }
+.theme-picker select { width: 182px; height: 40px; padding-inline: 36px 26px; font-size: 12px; }
+.header-controls { gap: 12px; flex-wrap: wrap; }
+@media (max-width: 760px) {
+  .theme-picker { grid-column: 1 / -1; grid-row: 2; width: 100%; }
+  .theme-picker select { width: 100%; height: 44px; font-size: 16px; }
+  .site-header .privacy-badge { grid-row: 3; }
+}
+
+/* PIXEL CONSOLE — ink, parchment, vermilion, teal. No gradients or glow. */
+:root[data-theme="console"] {
+  --bg: #0b0c09;
+  --surface: #11120e;
+  --raised: #25271e;
+  --border: #535445;
+  --text: #e3dfb3;
+  --muted: #bfbea1;
+  --subtle: #a3a58b;
+  --accent: #ff542e;
+  --accent-hover: #ff795b;
+  --accent-ink: #170e08;
+  --lime: #20b8aa;
+  --lime-ink: #071c19;
+  --coral: #ff795b;
+  --purple: #e3dfb3;
+  --display-font: 'Silkscreen', 'Microsoft YaHei', monospace;
+  font-family: 'Courier New', 'PingFang SC', 'Microsoft YaHei', monospace;
+  color-scheme: dark;
+  scrollbar-color: var(--border) var(--bg);
+}
+[data-theme="console"] body { background: var(--bg); }
+[data-theme="console"] ::selection { background: var(--lime); color: var(--bg); }
+[data-theme="console"] :is(button, select, input) { font-family: inherit; box-shadow: none; border-radius: 3px; }
+[data-theme="console"] :is(button, a, summary, input, select):focus-visible { outline: 2px solid var(--lime); outline-offset: 4px; }
+[data-theme="console"] :is(button, summary) svg { stroke-linecap: square; stroke-linejoin: miter; }
+[data-theme="console"] .site-header { border-bottom: 1px solid var(--border); min-height: 80px; }
+[data-theme="console"] .brand { font: 16px/1.25 var(--display-font); letter-spacing: -.04em; }
+[data-theme="console"] .brand-en { font: 10px/1.5 monospace; color: var(--subtle); letter-spacing: .28em; }
+[data-theme="console"] .brand-mark { width: 36px; height: 36px; border: 1px solid var(--text); background: var(--text); border-radius: 3px; }
+[data-theme="console"] .brand-mark svg { stroke: var(--bg); fill: var(--bg); }
+[data-theme="console"] .brand-mark path { fill: none; }
+[data-theme="console"] .privacy-badge svg { color: var(--lime); }
+[data-theme="console"] .theme-symbol { color: var(--text); }
+[data-theme="console"] .intro { position: relative; padding-block: 48px 38px; gap: 36px; border-color: var(--border); }
+[data-theme="console"] .intro:after { content: ''; position: absolute; bottom: -3px; inset-inline-start: 0; width: 40px; height: 5px; background: var(--accent); }
+[data-theme="console"] .eyebrow { color: var(--subtle); font-size: 11px; line-height: 1.6; letter-spacing: .12em; }
+[data-theme="console"] .intro .eyebrow:before { content: '✳'; display: inline-block; color: var(--accent); margin-inline-end: 10px; font: 19px/1 monospace; }
+[data-theme="console"] .intro h1 { font: 400 clamp(32px, 3.6vw, 48px)/1.2 var(--display-font); letter-spacing: -.055em; max-width: 760px; }
+[data-theme="console"] .intro p { font-size: 14px; line-height: 1.9; max-width: 380px; }
+[data-theme="console"] .intro-note > span:first-child { border-color: var(--border); color: var(--bg); background: var(--text); border-radius: 2px; }
+[data-theme="console"] .intro-note > [data-i18n] { font-family: inherit; font-size: 12px; line-height: 1.6; font-style: normal; color: var(--muted); }
+[data-theme="console"] :is(.clue-panel, .results-panel, .sketch-tool.practice-panel) { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: none; }
+[data-theme="console"] :is(.panel-heading h2, .results-heading h2, .dialog-heading h2) { font: 400 18px/1.5 var(--display-font); letter-spacing: -.03em; }
+[data-theme="console"] .panel-heading h2 { font-size: 15px; }
+[data-theme="console"] .step-number { display: inline-grid; place-items: center; width: 25px; height: 23px; background: var(--raised); border: 1px solid var(--border); color: var(--text); font: 10px var(--display-font); }
+[data-theme="console"] legend { font-size: 13px; }
+[data-theme="console"] .mode-switch { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; gap: 3px; }
+[data-theme="console"] .mode-switch button { color: var(--muted); }
+[data-theme="console"] .mode-switch button[aria-pressed=true] { background: var(--text); color: var(--bg); }
+[data-theme="console"] .mode-switch button[data-mode=include][aria-pressed=true] { background: var(--lime); }
+[data-theme="console"] .mode-switch button[data-mode=exclude][aria-pressed=true] { background: var(--accent); }
+[data-theme="console"] :is(.mode-indicator, .legend-dot, .start-key) { border-radius: 0; }
+[data-theme="console"] .input-grid { background: none; border: 1px solid var(--border); border-radius: 6px; margin-block: 20px 14px; padding: 18px 12px; }
+[data-theme="console"] .point-button { border-radius: 5px; background: var(--text); border: 1px solid var(--text); color: var(--bg); box-shadow: none; font: 20px/1 var(--display-font); }
+[data-theme="console"] .point-button:hover { background: #f3efd0; border-color: var(--text); }
+[data-theme="console"] .point-button.included { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+[data-theme="console"] .point-button.excluded { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+[data-theme="console"] .point-button.excluded:after { background: var(--bg); height: 2px; }
+[data-theme="console"] .legend-dot.neutral { background: var(--text); }
+[data-theme="console"] :is(select, input[type=number]) { background-color: var(--bg); color: var(--text); border: 1px solid var(--border); }
+[data-theme="console"] select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23e3dfb3' d='M3 5h10v2h-2v2H9v2H7V9H5V7H3z'/%3E%3C/svg%3E"); }
+[data-theme="console"] select option { background: var(--bg); color: var(--text); }
+[data-theme="console"] :is(select, input[type=number]):hover { border-color: var(--text); }
+[data-theme="console"] .length-tick:before { background: var(--border); border-radius: 0; }
+[data-theme="console"] .length-tick.active { color: var(--lime); }
+[data-theme="console"] .length-tick.active:before { background: var(--lime); }
+[data-theme="console"] .constraint-summary { background: var(--bg); border-color: var(--border); border-radius: 3px; }
+[data-theme="console"] .generate-button { background: var(--accent); border-color: var(--accent); color: var(--bg); border-radius: 4px; }
+[data-theme="console"] .generate-button:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+[data-theme="console"] :is(.secondary-button, .page-button, .icon-button) { background: var(--text); border-color: var(--text); color: var(--bg); }
+[data-theme="console"] :is(.secondary-button, .page-button, .icon-button):hover:not(:disabled) { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+[data-theme="console"] button:disabled { opacity: .4; }
+[data-theme="console"] :is(.total-badge, .remaining-badge) { background: var(--raised); border-color: var(--border); color: var(--text); border-radius: 2px; }
+[data-theme="console"] .remaining-badge { color: var(--lime); }
+[data-theme="console"] .length-filter { background: var(--raised); border-color: var(--border); color: var(--muted); border-radius: 2px; }
+[data-theme="console"] .length-filter[aria-pressed=true], [data-theme="console"] .length-filter:hover:not(:disabled) { background: var(--text); color: var(--bg); border-color: var(--text); }
+[data-theme="console"] .switch-ui { background: var(--raised); border: 1px solid var(--border); border-radius: 2px; width: 32px; height: 18px; }
+[data-theme="console"] .switch-ui:after { background: var(--muted); border-radius: 0; top: 2px; left: 2px; }
+[data-theme="console"] .number-toggle input:checked + .switch-ui { background: var(--lime); border-color: var(--lime); }
+[data-theme="console"] .number-toggle input:checked + .switch-ui:after { background: var(--bg); transform: translateX(14px); }
+[data-theme="console"] .number-toggle input:focus-visible + .switch-ui { outline-color: var(--lime); }
+[data-theme="console"] .pattern-card { background: var(--bg); border-color: var(--border); border-radius: 5px; transition: border-color .15s; }
+[data-theme="console"] .pattern-card:hover { background: var(--surface); border-color: var(--text); box-shadow: none; }
+[data-theme="console"] .card-length { color: var(--muted); border-color: var(--border); border-radius: 0; }
+[data-theme="console"] .pattern-svg .pattern-line { stroke: var(--text); stroke-linecap: square; stroke-linejoin: miter; stroke-width: 1.5; }
+[data-theme="console"] .pattern-svg .direction-marker { fill: var(--text); }
+[data-theme="console"] .pattern-svg .unused-dot { fill: var(--subtle); }
+[data-theme="console"] .pattern-svg .used-dot { fill: var(--text); stroke: var(--text); }
+[data-theme="console"] .pattern-svg .start-dot { fill: var(--lime); stroke: var(--lime); }
+[data-theme="console"] .pattern-svg .end-dot { fill: var(--bg); stroke: var(--text); }
+[data-theme="console"] .pattern-svg .point-label { fill: var(--bg); font: 10px var(--display-font); }
+[data-theme="console"] .pattern-svg .end-label { fill: var(--text); }
+[data-theme="console"] .pattern-sequence { font: 12px/1.6 monospace; color: var(--text); border-color: var(--border); }
+[data-theme="console"] .pattern-sequence .seq-arrow { color: var(--subtle); }
+[data-theme="console"] .pattern-dismiss { background: var(--raised); border-color: var(--border); color: var(--muted); border-radius: 0; }
+[data-theme="console"] .pattern-dismiss:hover { background: var(--accent); color: var(--bg); }
+[data-theme="console"] .pattern-card.is-dismissed { background: var(--bg); border-color: var(--border); border-style: dashed; }
+[data-theme="console"] .pattern-card.is-dismissed .pattern-dismiss { background: var(--raised); color: var(--coral); border-color: var(--border); }
+[data-theme="console"] .pattern-card.is-dismissed .pattern-dismiss:hover { background: var(--lime); color: var(--bg); }
+[data-theme="console"] :is(.empty-state, .detail-pattern) { background: var(--bg); border-color: var(--border); border-radius: 5px; }
+[data-theme="console"] .empty-state svg { fill: var(--bg); stroke: var(--text); }
+[data-theme="console"] .practice-panel summary { color: var(--text); }
+[data-theme="console"] .sketch-phone { padding: 18px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: none; }
+[data-theme="console"] .sketch-phone:before, [data-theme="console"] .sketch-phone:after { content: none; }
+[data-theme="console"] .sketch-phone .sketch-pad { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+[data-theme="console"] .sketch-line { stroke: var(--text); stroke-linecap: square; }
+[data-theme="console"] .sketch-guide { stroke: var(--lime); }
+[data-theme="console"] .sketch-point { background: var(--raised); border-color: var(--border); color: var(--text); border-radius: 4px; font: 16px/1 var(--display-font); }
+[data-theme="console"] .sketch-point:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+[data-theme="console"] .sketch-point.is-used { background: var(--text); color: var(--bg); border-color: var(--text); }
+[data-theme="console"] .sketch-point.is-start { background: var(--lime); color: var(--bg); border-color: var(--lime); }
+[data-theme="console"] .sketch-point.is-end:not(.is-start) { background: var(--bg); border-color: var(--text); color: var(--text); }
+[data-theme="console"] #sketch-points.is-dot-mode .sketch-point:before { border-radius: 1px; background: var(--muted); border-color: var(--muted); box-shadow: none; }
+[data-theme="console"] #sketch-points.is-dot-mode .sketch-point.is-used:before { background: var(--text); border-color: var(--text); }
+[data-theme="console"] #sketch-points.is-dot-mode .sketch-point.is-start:before { background: var(--lime); border-color: var(--lime); }
+[data-theme="console"] #sketch-points.is-dot-mode .sketch-point.is-end:not(.is-start):before { background: var(--bg); border-color: var(--text); }
+[data-theme="console"] :is(.detail-sequence, .sketch-sequence) .seq-number { background: var(--text); color: var(--bg); border-color: var(--text); border-radius: 2px; font: 14px/1.8 var(--display-font); }
+[data-theme="console"] .sketch-placeholder { font-family: inherit; }
+[data-theme="console"] .pattern-dialog { background: var(--surface); border: 1px solid var(--text); border-radius: 10px; box-shadow: none; }
+[data-theme="console"] .pattern-dialog::backdrop { background: #0b0c09e8; backdrop-filter: none; }
+[data-theme="console"] .toast { background: var(--text); border-color: var(--text); color: var(--bg); border-radius: 3px; box-shadow: none; }
+[data-theme="console"] .mobile-nav { background: var(--bg); border-color: var(--border); box-shadow: none; border-radius: 5px; }
+[data-theme="console"] .mobile-nav a { background: var(--raised); color: var(--text); border-radius: 2px; }
+[data-theme="console"] .mobile-nav a:hover, [data-theme="console"] .mobile-nav a[aria-current] { background: var(--text); color: var(--bg); }
+@media (max-width: 760px) {
+  [data-theme="console"] .brand { font-size: 12px; }
+  [data-theme="console"] .intro { padding-block: 12px 28px; }
+  [data-theme="console"] .intro h1 { font-size: clamp(27px, 6.8vw, 42px); letter-spacing: -.04em; line-height: 1.3; }
+  [data-theme="console"] .intro p { max-width: none; }
+  [data-theme="console"] :is(.results-heading h2, .dialog-heading h2) { font-size: 18px; }
+  [data-theme="console"] .pattern-sequence { font-size: 12px; }
+}
+@media (forced-colors: active) {
+  [data-theme="console"] .number-toggle input:checked + .switch-ui { background: Highlight; }
+  [data-theme="console"] :is(.point-button.included, .sketch-point.is-start) { border: 3px solid Highlight; }
+  [data-theme="console"] .pattern-svg :is(.pattern-line, .used-dot, .end-dot) { stroke: CanvasText; }
+  [data-theme="console"] .pattern-svg :is(.used-dot, .start-dot, .direction-marker) { fill: CanvasText; }
+  [data-theme="console"] .pattern-svg .point-label { fill: Canvas; }
+}
+
+/* Dual geometry lets theme switching preserve all existing SVG and replay state. */
+.pattern-svg .square-dot { display: none; }
+[data-theme="console"] .pattern-svg circle { display: none; }
+[data-theme="console"] .pattern-svg .square-dot { display: inline; }

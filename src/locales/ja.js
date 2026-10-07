@@ -1,11 +1,15 @@
 export default {
+  theme: "テーマ",
+  themeConsole: "ピクセルコンソール",
+  themeWarm: "暖色クラシック",
+
   language: '言語', tagline: '3 × 3 パターンの記憶サポート', privacy: '端末内で計算', eyebrow: '小さな記憶が、大きな手がかりに', heading: '覚えている点から、あの線を探そう', intro: '覚えている手がかりを選び、見覚えのあるパターンを探しましょう。', note: 'どの点も手がかりになる',
   clues: '記憶の手がかり', reset: 'リセット', pointsQuestion: 'どの点を覚えていますか？', include: '必ず含む', exclude: '含まない', clear: '解除', included: '含む', excluded: '除外', unknown: '不明', pointHint: 'モードを選び、点を押してください。もう一度押すと解除できます。',
   excludeDiagonal: '長い斜線を除外', diagonalHint: '1 → 8、1 → 9 は除外。1 → 5 は許可。', excludeStraight: '長い縦横の線を除外', straightHint: '1 → 7、1 → 3 は除外。1 → 4 は許可。',
   lengthQuestion: '何個の点をつなぎましたか？', min: '最少', max: '最多', lengthHint: 'スマートフォンのパターンは通常 4–9 点です。記憶に合わせて調整できます。', endpointsQuestion: '始点や終点を覚えていますか？', first: '最初の点', last: '最後の点', unsure: '不明', endpointsHint: '選んだ始点と終点は必ず含まれます。不明なら制限しません。',
   generate: '候補を探す', rules: 'パターンのルール', rulesBody: '各点は一度だけ使えます。長い斜線と長い縦横の線は個別に除外でき、初期状態では両方を除外します。隣接する点への斜線は許可されます。1 → 8 は長い斜線、1 → 7 は長い縦線です。長い線が途中の点を通る場合、その点は使用済みである必要があります。必須の点の順番は自由です。逆順のパターンは別々に表示します。',
   resultsEyebrow: 'つなぎ方を探す', results: '候補パターン', export: 'すべて出力', remaining: '残り', remainingHint: '現在の点数フィルター内で除外されていない候補数', showNumbers: '番号を表示', hideDismissed: '除外済みを隠す', restoreAll: 'すべて戻す',
-  footnote: '緑の点が始点、矢印が進む方向です。パターンを押すと描く順番を確認できます。', footer: '推測を減らし、手がかりを増やそう。', footerPrivacy: '再読み込みすると手がかりと図形は消えます。言語設定のみ保存します。',
+  footnote: '緑の点が始点、矢印が進む方向です。パターンを押すと描く順番を確認できます。', footer: '推測を減らし、手がかりを増やそう。', footerPrivacy: "手がかりとパターンは再読み込みで消去されます。言語とテーマのみ保存されます。",
   detailEyebrow: '詳しく見る', detailTitle: 'この線をたどる', close: '詳細を閉じる', replay: '再生', copy: '順番をコピー',
   sketchTitle: '試し描き', expand: '開く', collapse: '閉じる', sketchHint: 'ドラッグするか、点を順に押してください。覚えている方向に描いてみましょう。', sketchPrompt: '見覚えのある線を描く', drawingOrder: '描いた順番', undo: '1 点戻す', clearSketch: '描画を消す', sketchEmpty: 'ここに点の順番が表示されます',
   sketchAdjacent: '隣接する点のみ。隣接点への斜線は許可', sketchDiagonal: '長い斜線を除外。長い縦横の線は許可', sketchStraight: '長い縦横の線を除外。長い斜線は許可', sketchAndroid: 'Android ルール：未使用の中間点は自動追加', sketchConflict: '現在のルールで除外される線があります。戻すか消して描き直してください。', sketchRepeat: '点 {point} は使用済みです。', sketchBlockedDiagonal: '{from} → {to} は長い斜線のため除外されています。', sketchBlockedStraight: '{from} → {to} は長い縦横の線のため除外されています。', sketchDot: '試し描きの点 {point}', sketchDotOrder: '試し描きの点 {point}、{order} 番目',

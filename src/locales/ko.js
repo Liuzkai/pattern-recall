@@ -1,11 +1,15 @@
 export default {
+  theme: "테마",
+  themeConsole: "픽셀 콘솔",
+  themeWarm: "따뜻한 클래식",
+
   language: '언어', tagline: '3 × 3 패턴 기억 도우미', privacy: '기기 안에서만 계산', eyebrow: '작은 기억이 큰 단서가 됩니다', heading: '기억나는 점에서 그 선을 찾아보세요', intro: '기억나는 단서를 선택하고 익숙한 패턴을 찾아보세요.', note: '모든 점이 단서가 됩니다',
   clues: '기억의 단서', reset: '초기화', pointsQuestion: '어떤 점이 기억나나요?', include: '반드시 포함', exclude: '반드시 제외', clear: '해제', included: '포함', excluded: '제외', unknown: '모름', pointHint: '모드를 선택한 뒤 점을 누르세요. 다시 누르면 해제됩니다.',
   excludeDiagonal: '긴 대각선 제외', diagonalHint: '1 → 8, 1 → 9 제외. 1 → 5 허용.', excludeStraight: '긴 가로·세로선 제외', straightHint: '1 → 7, 1 → 3 제외. 1 → 4 허용.',
   lengthQuestion: '몇 개의 점을 연결했나요?', min: '최소', max: '최대', lengthHint: '휴대전화 패턴은 보통 4–9개 점입니다. 기억에 맞게 조정하세요.', endpointsQuestion: '시작점이나 끝점이 기억나나요?', first: '첫 번째 점', last: '마지막 점', unsure: '모름', endpointsHint: '선택한 시작점과 끝점은 반드시 포함됩니다. 모름으로 두면 제한하지 않습니다.',
   generate: '가능한 패턴 찾기', rules: '패턴 규칙', rulesBody: '각 점은 한 번만 사용할 수 있습니다. 긴 대각선과 긴 가로·세로선은 각각 제외할 수 있으며 기본적으로 둘 다 제외됩니다. 인접한 점의 대각선은 허용됩니다. 1 → 8은 긴 대각선, 1 → 7은 긴 세로선입니다. 긴 선이 중간 점을 지나면 그 점은 이미 사용된 상태여야 합니다. 필수 점의 순서는 자유이며 역순 패턴은 별도로 표시됩니다.',
   resultsEyebrow: '가능성 살펴보기', results: '가능한 패턴', export: '모두 내보내기', remaining: '남은 개수', remainingHint: '현재 점 수 필터에서 제외되지 않은 패턴 수', showNumbers: '번호 표시', hideDismissed: '제외한 패턴 숨기기', restoreAll: '모두 복원',
-  footnote: '초록색 점은 시작점이며 화살표는 연결 방향입니다. 패턴을 누르면 그리는 순서를 볼 수 있습니다.', footer: '추측은 줄이고 단서는 더하세요.', footerPrivacy: '새로고침하면 단서와 패턴이 지워집니다. 언어 설정만 저장됩니다.',
+  footnote: '초록색 점은 시작점이며 화살표는 연결 방향입니다. 패턴을 누르면 그리는 순서를 볼 수 있습니다.', footer: '추측은 줄이고 단서는 더하세요.', footerPrivacy: "새로고침하면 단서와 패턴이 지워집니다. 언어와 테마 설정만 저장됩니다.",
   detailEyebrow: '자세히 보기', detailTitle: '이 선 따라가기', close: '상세 보기 닫기', replay: '다시 재생', copy: '점 순서 복사',
   sketchTitle: '패턴 그려보기', expand: '펼치기', collapse: '접기', sketchHint: '드래그하거나 점을 차례로 누르세요. 기억나는 방향으로 그려보세요.', sketchPrompt: '익숙한 선 그려보기', drawingOrder: '그린 순서', undo: '한 점 되돌리기', clearSketch: '그림 지우기', sketchEmpty: '여기에 점 순서가 표시됩니다',
   sketchAdjacent: '인접한 점만 연결, 인접 대각선 허용', sketchDiagonal: '긴 대각선 제외, 긴 가로·세로선 허용', sketchStraight: '긴 가로·세로선 제외, 긴 대각선 허용', sketchAndroid: 'Android 규칙: 사용하지 않은 중간 점 자동 추가', sketchConflict: '현재 규칙에서 제외되는 선이 있습니다. 되돌리거나 지운 뒤 다시 그려보세요.', sketchRepeat: '점 {point}은(는) 이미 사용했습니다.', sketchBlockedDiagonal: '{from} → {to}은(는) 긴 대각선이므로 제외됩니다.', sketchBlockedStraight: '{from} → {to}은(는) 긴 가로·세로선이므로 제외됩니다.', sketchDot: '연습 점 {point}', sketchDotOrder: '연습 점 {point}, 순서 {order}',

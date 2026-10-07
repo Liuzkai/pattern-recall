@@ -139,6 +139,12 @@ scripts/build.mjs      Static asset build
 tests/                 Algorithm and interaction checks
 ```
 
-Enumeration uses depth-first search with bitmask pruning. Results are stored in a `Uint32Array` and transferred from a Worker. Only one page is rendered at a time. CSV exports are generated in chunks to avoid blocking interaction. Clues and patterns are processed locally, are not uploaded, and are not persisted between page reloads. Only the language preference is saved in local storage; the app still works when storage is unavailable.
+Enumeration uses depth-first search with bitmask pruning. Results are stored in a `Uint32Array` and transferred from a Worker. Only one page is rendered at a time. CSV exports are generated in chunks to avoid blocking interaction. Clues and patterns are processed locally, are not uploaded, and are not persisted between page reloads. Only language and theme preferences are saved in local storage; the app still works when storage is unavailable.
 
 In browsers that support WebMCP, the page optionally registers an `enumerate_pattern_candidates` tool using the same state and actions as the interface. `excludeLongDiagonal` and `excludeLongStraight` control the two crossing exclusions independently. The legacy `adjacentOnly` option defaults to `true` and provides a shared default for both filters; explicit individual options take precedence. Browsers without WebMCP can use the app normally.
+
+## Pixel console theme
+
+The header theme selector switches between **Pixel console** (the default for new visits) and **Warm editorial**. The console uses ink, parchment, vermilion and teal with square dot geometry, pixel headings, flat keys, consistent result cards, dialogs and mobile navigation. Silkscreen is self-hosted under the SIL OFL in `src/fonts/Silkscreen-OFL.txt`; non-Latin text uses readable system fallbacks.
+
+Only language and theme preferences are persisted. `pattern-recall.theme` is restored before first paint, with a safe fallback when storage is blocked. Switching themes preserves clues, drawings, dismissed candidates, pagination and open details. Theme styles live in `src/console.css`, initialization in `src/theme.js`.

@@ -1,11 +1,15 @@
 export default {
+  theme: "主題",
+  themeConsole: "像素控制台",
+  themeWarm: "暖調經典",
+
   language: '語言', tagline: '3 × 3 圖形密碼回憶工具', privacy: '僅在本機計算', eyebrow: '一點記憶，就能成為線索', heading: '從記得的點，找回那條線', intro: '留下你還記得的線索，讓熟悉的圖形浮現。', note: '每一個點，都可能是線索',
   clues: '你的記憶線索', reset: '重設', pointsQuestion: '記得哪些點？', include: '必須包含', exclude: '一定排除', clear: '清除', included: '包含', excluded: '排除', unknown: '不確定', pointHint: '先選模式，再點選九宮格。再次點選可取消。',
   excludeDiagonal: '排除斜線跨格', diagonalHint: '排除 1 → 8、1 → 9 等長斜線，允許 1 → 5。', excludeStraight: '排除直線跨格', straightHint: '排除 1 → 7、1 → 3 等長直線，允許 1 → 4。',
   lengthQuestion: '大概連接了多少個點？', min: '最少', max: '最多', lengthHint: '常見手機圖形為 4–9 個點，可按記憶調整。', endpointsQuestion: '還記得起點和終點嗎？', first: '第一個點', last: '最後一個點', unsure: '不確定', endpointsHint: '選擇後會自動包含該點；不確定時不限制。',
   generate: '列出可能的圖形', rules: '圖形規則', rulesBody: '每個點只能使用一次。斜線與直線的跨格排除可獨立切換，預設均開啟。相鄰斜線仍然允許。1 → 8 屬於斜線跨格，1 → 7 屬於直線跨格。允許跨格時，連線跨過的中間點必須已經使用。包含的點不限定先後順序，反向圖形分別列出。',
   resultsEyebrow: '探索可能的連線', results: '可能的圖形', export: '全部匯出', remaining: '剩餘', remainingHint: '目前點數篩選下，未被排除的圖形數量', showNumbers: '顯示數字', hideDismissed: '隱藏已排除', restoreAll: '全部還原',
-  footnote: '綠色圓點為起點，箭頭表示連接方向。點選圖形查看繪製順序。', footer: '少一點猜測，多一點線索。', footerPrivacy: '重新整理後清除線索和圖形，僅儲存語言偏好。',
+  footnote: '綠色圓點為起點，箭頭表示連接方向。點選圖形查看繪製順序。', footer: '少一點猜測，多一點線索。', footerPrivacy: "線索和圖案在重新整理後清空，僅儲存語言和主題偏好。",
   detailEyebrow: '仔細看看', detailTitle: '看看這條線', close: '關閉圖形詳情', replay: '重播連線', copy: '複製點序列',
   sketchTitle: '試畫九宮格', expand: '展開', collapse: '收合', sketchHint: '按住拖曳畫線，也可逐點點選。試著畫出記憶中的方向。', sketchPrompt: '試著連一條熟悉的線', drawingOrder: '繪製順序', undo: '復原上一點', clearSketch: '清空試畫', sketchEmpty: '點序列會顯示在這裡',
   sketchAdjacent: '僅連接相鄰點，允許相鄰斜線', sketchDiagonal: '排除斜線跨格，允許直線跨格', sketchStraight: '排除直線跨格，允許斜線跨格', sketchAndroid: 'Android 連線規則，未使用的中間點會自動補入', sketchConflict: '已有連線包含被目前規則排除的連接，可復原或清空後重畫。', sketchRepeat: '點 {point} 已經使用過了。', sketchBlockedDiagonal: '{from} → {to} 屬於斜線跨格，目前已排除。', sketchBlockedStraight: '{from} → {to} 屬於直線跨格，目前已排除。', sketchDot: '試畫點 {point}', sketchDotOrder: '試畫點 {point}，第 {order} 個點',
