@@ -2,6 +2,7 @@
   "name": "pattern-recall",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "本地运行的 3×3 图案密码回忆工具",
   "scripts": {

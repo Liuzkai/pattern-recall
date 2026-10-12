@@ -146,3 +146,9 @@ tests/                 核心算法与交互逻辑验证
 顶部主题选择器可切换「像素控制台」（新访问默认）与「暖调经典」。新主题使用近黑、旧纸黄、朱红、青绿四色，统一方形点位、像素标题、扁平按键、候选卡片、弹窗和移动导航。Silkscreen 字体随站点托管，许可见 `src/fonts/Silkscreen-OFL.txt`；中文和其他非拉丁文字回退到清晰的系统字体。
 
 主题偏好存储于 `pattern-recall.theme`，禁用存储时仍可切换。切换不会重新计算或清除线索、试画、候选排除和当前页。语言和主题偏好会保存，其余数据仍仅在页面内存中。样式在 `src/console.css`，首屏主题恢复在 `src/theme.js`。
+
+## 许可
+
+本仓库中 Liuzkai 的原创代码及其原创配套文档采用 [MIT 许可](LICENSE)，允许使用、复制、修改和商业分发；分发软件副本或实质性部分时，须保留版权声明及完整许可声明。无需在产品界面署名。第三方组件或内容仍遵循各自的原许可，相关版权及许可声明必须保留。
+
+`src/fonts/` 中的字体不在本项目 MIT 授权范围内：Instrument Serif 遵循 [SIL OFL](src/fonts/OFL.txt)，Silkscreen 遵循 [SIL OFL](src/fonts/Silkscreen-OFL.txt)。

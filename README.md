@@ -148,3 +148,9 @@ In browsers that support WebMCP, the page optionally registers an `enumerate_pat
 The header theme selector switches between **Pixel console** (the default for new visits) and **Warm editorial**. The console uses ink, parchment, vermilion and teal with square dot geometry, pixel headings, flat keys, consistent result cards, dialogs and mobile navigation. Silkscreen is self-hosted under the SIL OFL in `src/fonts/Silkscreen-OFL.txt`; non-Latin text uses readable system fallbacks.
 
 Only language and theme preferences are persisted. `pattern-recall.theme` is restored before first paint, with a safe fallback when storage is blocked. Switching themes preserves clues, drawings, dismissed candidates, pagination and open details. Theme styles live in `src/console.css`, initialization in `src/theme.js`.
+
+## License
+
+Original code and its original accompanying documentation by Liuzkai are licensed under the [MIT License](LICENSE). Use, copying, modification, and commercial distribution are permitted, provided that the copyright notice and full license notice are retained in copies or substantial portions of the software. No attribution in the product UI is required. Third-party components and content remain subject to their original licenses; retain their copyright and license notices.
+
+Fonts in `src/fonts/` are excluded from the project MIT grant: Instrument Serif uses [SIL OFL](src/fonts/OFL.txt), and Silkscreen uses [SIL OFL](src/fonts/Silkscreen-OFL.txt).
